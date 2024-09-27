@@ -45,7 +45,7 @@ npx ts-node index.ts
 
 The project documentation is built using [Vitepress](https://vitepress.dev/). It provides detailed explanations of the exercises and other useful information.
 
-- Docs URL: mlrcbsousa.github.io/matrix/
+- Docs URL: [mlrcbsousa.github.io/matrix/](https://mlrcbsousa.github.io/matrix/)
 
 ### Building the Documentation
 
@@ -71,6 +71,6 @@ npm run docs:preview
 
 The documentation is deployed to GitHub Pages. Ensure that your project is correctly set up to deploy to the GitHub repository `mlrcbsousa/matrix`.
 
-Documentation is automatically deployed after pushes to the **main** branch.
+Documentation is automatically deployed after pushes to the **main** branch with changes to the `docs/` folder and deploy config file.
 
-For more on the deployment details check the file `.github/workflows/deploy.yml`
+For more on the deployment details check the file [`.github/workflows/deploy.yml`](/.github/workflows/deploy.yml)
