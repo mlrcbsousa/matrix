@@ -71,6 +71,6 @@ npm run docs:preview
 
 The documentation is deployed to GitHub Pages. Ensure that your project is correctly set up to deploy to the GitHub repository `mlrcbsousa/matrix`.
 
-Documentation is automatically deployed after pushes to the **main** branch with changes to the `docs/` folder and deploy config file.
+Documentation is automatically deployed after pushes to the **main** branch and changes to the `docs/` folder or deploy config file.
 
 For more on the deployment details check the file [`.github/workflows/deploy.yml`](/.github/workflows/deploy.yml)
