@@ -1,8 +1,6 @@
 # matrix
 
-TODO: link to 42 school
-
-This repository contains the **matrix** project for 42 School, focused on a series of exercises written in Rust and TypeScript. The exercises are located in the `src` folder and can be run individually.
+This repository contains the **matrix** project for [42 School](https://www.42network.org/), focused on a series of exercises written in Rust and TypeScript. The exercises are located in the `src` folder and can be run individually.
 
 - [Documentation](https://mlrcbsousa.github.io/matrix/).
 
