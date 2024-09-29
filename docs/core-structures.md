@@ -45,23 +45,6 @@ export interface Display {
 - Method:
   - `toString(): string`: Returns a string representation of the class instance.
 
-<!-- ### 4. **Structure Interface**
-
-The `Structure` interface describes objects that support arithmetic operations (addition, subtraction, scalar multiplication) on their structure.
-
-```typescript
-export interface Structure<K, T> {
-  add(other: T): T;
-  sub(other: T): T;
-  scl(scalar: K): T;
-}
-```
-
-- Methods:
-  - `add(other: T): T`: Adds another structure of the same type.
-  - `sub(other: T): T`: Subtracts another structure of the same type.
-  - `scl(scalar: K): T`: Multiplies the structure by a scalar. -->
-
 ## Matrix Class
 
 ### Description
