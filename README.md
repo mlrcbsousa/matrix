@@ -50,13 +50,13 @@ cargo test
 ### Running TypeScript exercises:
 
 ```bash
-npx ts-node src/index.ts
+npm start
 ```
 
 Run the tests for that exercise
 
 ```
-npm run test
+npm test
 ```
 
 ## Documentation

@@ -1,6 +1,7 @@
 {
   "name": "ex00",
   "scripts": {
+    "start": "node --no-warnings --loader ts-node/esm src/index.ts",
     "test": "vitest"
   },
   "type": "module",
