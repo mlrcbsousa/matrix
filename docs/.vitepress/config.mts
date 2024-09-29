@@ -16,6 +16,8 @@ export default defineConfig({
         text: 'Introduction',
         items: [
           { text: 'Start here', link: '/introduction' },
+          { text: 'Testing', link: '/testing' },
+          { text: 'Core Structures', link: '/core-structures' },
         ]
       },
       {

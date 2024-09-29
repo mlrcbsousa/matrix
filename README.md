@@ -1,12 +1,12 @@
 # matrix
 
-This repository contains the **matrix** project for [42 School](https://www.42network.org/), focused on a series of exercises written in Rust and TypeScript. The exercises are located in the `src` folder and can be run individually.
+This repository contains the **matrix** project for [42 School](https://www.42network.org/), focused on a series of exercises written in Rust and TypeScript. The exercises are located in the `exercises` folder and can be run individually.
 
 - [Documentation](https://mlrcbsousa.github.io/matrix/).
 
 ## Project Structure
 
-- `src/`: Contains all the exercises.
+- `exercises/`: Contains all the exercises.
   - Exercises are written in **Rust** and **TypeScript**.
   - Each exercise is independent and can be executed individually.
 
@@ -22,10 +22,18 @@ cd matrix
 Navigate to the desired exercise folder:
 
 ```bash
-cd src/ex00
+cd exercises/ex00
 ```
 
 Exercises go from `ex00` to `ex15`
+
+### Install
+
+Install TypeScript dependencies
+
+```bash
+npm install
+```
 
 ### Running Rust exercises:
 
@@ -33,10 +41,22 @@ Exercises go from `ex00` to `ex15`
 cargo run
 ```
 
+Run the tests for that exercise
+
+```
+cargo test
+```
+
 ### Running TypeScript exercises:
 
 ```bash
-npx ts-node index.ts
+npm start
+```
+
+Run the tests for that exercise
+
+```
+npm test
 ```
 
 ## Documentation
@@ -44,6 +64,14 @@ npx ts-node index.ts
 The project documentation is built using [Vitepress](https://vitepress.dev/). It provides detailed explanations of the exercises and other useful information.
 
 - Docs URL: [mlrcbsousa.github.io/matrix/](https://mlrcbsousa.github.io/matrix/)
+
+### Install
+
+Install TypeScript dependencies
+
+```bash
+npm install
+```
 
 ### Building the Documentation
 
