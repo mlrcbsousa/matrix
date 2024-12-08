@@ -2,7 +2,7 @@
 
 echo "----PRE COMMIT START----"
 
-echo "Running tests..."
+echo "----Running tests..."
 cargo test || exit 1
 
 echo "Running formatting..."
