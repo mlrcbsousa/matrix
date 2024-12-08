@@ -1,0 +1,23 @@
+[package]
+name = "matrix"
+version = "0.1.0"
+edition = "2021"
+authors = ["Manuel Sousa <mlrcbsousa@gmail.com>"]
+description = "A linear algebra library for matrix operations"
+documentation = "https://mlrcbsousa.github.io/matrix/"
+repository = "https://github.com/mlrcbsousa/matrix"
+
+[dependencies]
+
+[dev-dependencies.cargo-husky]
+version = "1"
+default-features = false
+features = ["user-hooks"]
+
+[lib]
+name = "matrix"
+path = "src/lib.rs"
+
+[[bin]]
+name = "matrix"
+path = "src/main.rs"

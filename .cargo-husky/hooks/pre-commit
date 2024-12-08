@@ -1,0 +1,20 @@
+#!/bin/sh
+
+echo "----PRE COMMIT START----"
+
+echo "Running tests..."
+cargo test || exit 1
+
+echo "Running formatting..."
+cargo fmt
+
+echo "Running clippy..."
+cargo clippy -- -D warnings || exit 1
+
+echo "Building documentation..."
+cargo doc --no-deps || exit 1
+
+echo "Building the demo..."
+cargo build || exit 1
+
+echo "----PRE COMMIT END----"
