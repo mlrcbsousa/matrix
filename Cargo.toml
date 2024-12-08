@@ -11,7 +11,7 @@ repository = "https://github.com/mlrcbsousa/matrix"
 
 [dev-dependencies]
 cargo-husky = "1"
-commitlint = "0.0.0"
+commitlint-rs = "0.2.2"
 
 [lib]
 name = "matrix"
@@ -25,5 +25,5 @@ path = "src/main.rs"
 [package.metadata.husky]
 hooks = """
     pre-commit = ".husky/pre-commit"
-    commit-msg = ".husky/commit-msg"
 """
+    # commit-msg = ".husky/commit-msg"
