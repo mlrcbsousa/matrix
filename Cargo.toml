@@ -21,10 +21,3 @@ path = "src/lib.rs"
 [[bin]]
 name = "matrix"
 path = "src/main.rs"
-
-# Husky configuration
-[package.metadata.husky]
-hooks = """
-    pre-commit = ".husky/pre-commit"
-"""
-    # commit-msg = ".husky/commit-msg"

@@ -2,19 +2,19 @@
 
 echo "----PRE COMMIT START----"
 
-# Run tests
+echo "Running tests..."
 cargo test || exit 1
 
-# Check formatting
-cargo fmt -- --check || exit 1
+echo "Running formatting..."
+cargo fmt
 
-# Run clippy
+echo "Running clippy..."
 cargo clippy -- -D warnings || exit 1
 
-# Build documentation
+echo "Building documentation..."
 cargo doc --no-deps || exit 1
 
-# Build the demo
+echo "Building the demo..."
 cargo build || exit 1
 
 echo "----PRE COMMIT END----"
