@@ -1,16 +1,19 @@
 # matrix
 
-This repository contains the **matrix** project for [42 School](https://www.42network.org/), focused on a series of exercises written in Rust and TypeScript. The exercises are located in the `exercises` folder and can be run individually.
+This repository contains the **matrix** project for [42 School](https://www.42network.org/), implementing a linear algebra library in Rust. The project focuses on implementing vector and matrix operations from scratch.
 
 - [Documentation](https://mlrcbsousa.github.io/matrix/).
 
 ## Project Structure
 
-- `exercises/`: Contains all the exercises.
-  - Exercises are written in **Rust** and **TypeScript**.
-  - Each exercise is independent and can be executed individually.
+```
+matrix/
+└── src/
+    ├── lib.rs    # Library implementation
+    └── main.rs   # Demo binary
+```
 
-## How to Run the Project
+## Installation
 
 Clone the repository:
 
@@ -19,84 +22,83 @@ git clone https://github.com/mlrcbsousa/matrix.git
 cd matrix
 ```
 
-Navigate to the desired exercise folder:
+## Usage
 
-```bash
-cd exercises/ex00
-```
+The project can be used both as a library and a demo binary.
 
-Exercises go from `ex00` to `ex15`
-
-### Install
-
-Install TypeScript dependencies
-
-```bash
-npm install
-```
-
-### Running Rust exercises:
+### Run the Demo
 
 ```bash
 cargo run
 ```
 
-Run the tests for that exercise
+### Use as a Library
 
+Add to your `Cargo.toml`:
+```toml
+[dependencies]
+matrix = { git = "https://github.com/mlrcbsousa/matrix" }
 ```
+
+## Development
+
+### Testing
+
+Run the test suite:
+```bash
 cargo test
 ```
 
-### Running TypeScript exercises:
+### Code Quality
 
+Format your code:
 ```bash
-npm start
+cargo fmt
 ```
 
-Run the tests for that exercise
-
+Run the linter:
+```bash
+cargo clippy -- -D warnings
 ```
-npm test
+
+### Documentation
+
+Generate and view documentation locally:
+```bash
+# Generate docs
+cargo doc --no-deps
+
+# Open in browser (on Unix systems)
+open target/doc/matrix/index.html
 ```
 
 ## Documentation
 
-The project documentation is built using [Vitepress](https://vitepress.dev/). It provides detailed explanations of the exercises and other useful information.
+The project documentation is automatically generated from code comments using `rustdoc`.
 
 - Docs URL: [mlrcbsousa.github.io/matrix/](https://mlrcbsousa.github.io/matrix/)
 
-### Install
+### Deploying Documentation
 
-Install TypeScript dependencies
+Documentation is automatically deployed to GitHub Pages when:
+- Changes are pushed to the **main** branch AND
+- Changes affect:
+  - Rust source files (`src/**/*.rs`)
+  - `Cargo.toml`
+  - Deploy configuration
 
-```bash
-npm install
-```
+Manual deployment can be triggered from the GitHub Actions tab using the `workflow_dispatch` event.
 
-### Building the Documentation
+For deployment details check [`.github/workflows/deploy.yml`](/.github/workflows/deploy.yml)
 
-To start the documentation in development mode:
+## Git Hooks
 
-```bash
-npm run docs:dev
-```
+This project uses git hooks for quality control. The following checks run automatically before each commit:
 
-To build the documentation for production:
+- Test suite (`cargo test`)
+- Code formatting (`cargo fmt`)
+- Linting (`cargo clippy`)
+- Documentation generation (`cargo doc`)
+- Demo build (`cargo build`)
 
-```bash
-npm run docs:build
-```
-
-To preview the production build locally:
-
-```bash
-npm run docs:preview
-```
-
-### Deploying the Documentation
-
-The documentation is deployed to GitHub Pages. Ensure that your project is correctly set up to deploy to the GitHub repository `mlrcbsousa/matrix`.
-
-Documentation is automatically deployed after pushes to the **main** branch and changes to the `docs/` folder or deploy config file.
-
-For more on the deployment details check the file [`.github/workflows/deploy.yml`](/.github/workflows/deploy.yml)
+These hooks are managed through `cargo-husky` and will be installed automatically when you build the project.
