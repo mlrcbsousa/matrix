@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cargo run --package commitlint -- --edit $1

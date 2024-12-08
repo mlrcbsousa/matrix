@@ -4,9 +4,5 @@
 # Rust
 target
 
-# TypeScript
+# TypeScript - [TODO] remove after having removed exercises folder with node_modules
 node_modules
-
-# Vitepress
-docs/.vitepress/dist
-docs/.vitepress/cache

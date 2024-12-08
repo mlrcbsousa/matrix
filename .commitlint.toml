@@ -1,0 +1,17 @@
+conventional-commits = true
+types = [
+    "feat",     # New features
+    "fix",      # Bug fixes
+    "docs",     # Documentation changes
+    "style",    # Code style changes (formatting, etc)
+    "refactor", # Code refactoring
+    "perf",     # Performance improvements
+    "test",     # Adding or modifying tests
+    "chore",    # Maintenance tasks
+]
+scopes = [
+    "vector",   # Vector-related changes
+    "matrix",   # Matrix-related changes
+    "docs",     # Documentation system
+    "ci",       # CI/CD related
+]
