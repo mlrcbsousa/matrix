@@ -9,9 +9,10 @@ repository = "https://github.com/mlrcbsousa/matrix"
 
 [dependencies]
 
-[dev-dependencies]
-cargo-husky = "1"
-commitlint-rs = "0.2.2"
+[dev-dependencies.cargo-husky]
+version = "1"
+default-features = false
+features = ["user-hooks"]
 
 [lib]
 name = "matrix"
