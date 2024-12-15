@@ -134,6 +134,87 @@ impl<K: Scalar> Matrix<K> {
     pub fn is_square(&self) -> bool {
         self.rows() == self.cols()
     }
+
+    /// Adds another matrix to this one in place.
+    /// Both matrices must have the same dimensions.
+    ///
+    /// # Arguments
+    /// * `other` - The matrix to add to this one.
+    ///
+    /// # Panics
+    /// Panics if the matrices have different dimensions.
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let mut m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    /// let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+    /// m1.add(&m2);
+    /// // m1 is now [[6.0, 8.0], [10.0, 12.0]]
+    /// ```
+    pub fn add(&mut self, other: &Matrix<K>) {
+        if self.shape() != other.shape() {
+            panic!("Addition requires matrices with the same shape.");
+        }
+
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[i][j] += other.data[i][j];
+            }
+        }
+    }
+
+    /// Subtracts another matrix from this one in place.
+    /// Both matrices must have the same dimensions.
+    ///
+    /// # Arguments
+    /// * `other` - The matrix to subtract from this one.
+    ///
+    /// # Panics
+    /// Panics if the matrices have different dimensions.
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let mut m1 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+    /// let m2 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    /// m1.sub(&m2);
+    /// // m1 is now [[4.0, 4.0], [4.0, 4.0]]
+    /// ```
+    pub fn sub(&mut self, other: &Matrix<K>) {
+        if self.shape() != other.shape() {
+            panic!("Subtraction requires matrices with the same shape.");
+        }
+
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[i][j] -= other.data[i][j];
+            }
+        }
+    }
+
+    /// Scales this matrix by a scalar value in place.
+    ///
+    /// # Arguments
+    /// * `a` - The scalar value to scale the matrix by.
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let mut m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    /// m.scl(2.0);
+    /// // m is now [[2.0, 4.0], [6.0, 8.0]]
+    /// ```
+    pub fn scl(&mut self, a: K) {
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[i][j] *= a;
+            }
+        }
+    }
 }
 
 // Implementation for initializing a Matrix with arrays
@@ -263,6 +344,56 @@ mod tests {
             let display = format!("{}", m);
             assert!(display.contains("[1, 2]"));
             assert!(display.contains("[3, 4]"));
+        }
+    }
+
+    mod operation_tests {
+        use super::*;
+
+        #[test]
+        fn test_matrix_add() {
+            let mut m1 = create_test_matrix();
+            let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+            m1.add(&m2);
+            assert_eq!(m1.data, vec![vec![6.0, 8.0], vec![10.0, 12.0]]);
+        }
+
+        #[test]
+        #[should_panic(expected = "Addition requires matrices with the same shape.")]
+        fn test_matrix_add_panic() {
+            let mut m1 = create_test_matrix();
+            let m2 = create_test_rect_matrix();
+            m1.add(&m2);
+        }
+
+        #[test]
+        fn test_matrix_sub() {
+            let mut m1 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+            let m2 = create_test_matrix();
+            m1.sub(&m2);
+            assert_eq!(m1.data, vec![vec![4.0, 4.0], vec![4.0, 4.0]]);
+        }
+
+        #[test]
+        #[should_panic(expected = "Subtraction requires matrices with the same shape.")]
+        fn test_matrix_sub_panic() {
+            let mut m1 = create_test_matrix();
+            let m2 = create_test_rect_matrix();
+            m1.sub(&m2);
+        }
+
+        #[test]
+        fn test_matrix_scl() {
+            let mut m = create_test_matrix();
+            m.scl(2.0);
+            assert_eq!(m.data, vec![vec![2.0, 4.0], vec![6.0, 8.0]]);
+        }
+
+        #[test]
+        fn test_matrix_zero_scale() {
+            let mut m = create_test_matrix();
+            m.scl(0.0);
+            assert_eq!(m.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
         }
     }
 }

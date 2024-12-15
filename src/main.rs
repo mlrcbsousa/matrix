@@ -82,6 +82,57 @@ fn type_matrix() {
 fn exercise_00() {
     println!();
     println!("Exercise 00 - Add, Subtract and Scale");
+    println!("-------------------------------------");
+
+    let scalar = 2.0;
+
+    let mut v1 = Vector::new(vec![1.0, 2.0, 3.0]);
+    let v2 = Vector::new(vec![4.0, 5.0, 6.0]);
+
+    println!("\nVector 1:");
+    v1.print();
+    println!("\nVector 2:");
+    v2.print();
+
+    v1.add(&v2);
+    println!("\nVector 1 + Vector 2:");
+    v1.print();
+
+    v1.sub(&v2);
+    println!("\nVector 1 - Vector 2:");
+    v1.print();
+
+    v1.scl(scalar);
+    println!("\nVector 1 * {}: ", scalar);
+    v1.print();
+
+    v1.scl(0.0);
+    println!("\nVector 1 * 0: ");
+    v1.print();
+
+    let mut m1 = Matrix::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]]);
+    let m2 = Matrix::new(vec![vec![5.0, 6.0], vec![7.0, 8.0]]);
+
+    println!("\nMatrix 1:");
+    m1.print();
+    println!("\nMatrix 2:");
+    m2.print();
+
+    m1.add(&m2);
+    println!("\nMatrix 1 + Matrix 2:");
+    m1.print();
+
+    m1.sub(&m2);
+    println!("\nMatrix 1 - Matrix 2:");
+    m1.print();
+
+    m1.scl(scalar);
+    println!("\nMatrix 1 * {}: ", scalar);
+    m1.print();
+
+    m1.scl(0.0);
+    println!("\nMatrix 1 * 0: ");
+    m1.print();
 }
 
 fn main() {
