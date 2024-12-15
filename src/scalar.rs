@@ -7,13 +7,13 @@
 //! - Formatting capabilities (Debug and Display)
 
 use std::fmt::{Debug, Display};
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 /// A type that can be used as a scalar in linear algebra operations.
 ///
-/// The zero() and one() methods are required because:
-/// - zero(): Needed for vector/matrix initialization and addition identity
-/// - one(): Needed for matrix diagonal initialization and multiplication identity
+/// The `zero()` and `one()` methods are required because:
+/// - `zero()`: Needed for vector/matrix initialization and addition identity
+/// - `one()`: Needed for matrix diagonal initialization and multiplication identity
 ///
 /// # Example
 /// ```
@@ -28,24 +28,28 @@ use std::ops::{Add, Div, Mul, Sub};
 /// let zero = f32::zero();
 /// ```
 pub trait Scalar:
-    Copy +                    // Values must be copyable
-    Add<Output = Self> +      // a + b
-    Sub<Output = Self> +      // a - b
-    Mul<Output = Self> +      // a * b
-    Div<Output = Self> +      // a / b
-    Debug +                   // println!("{:?}", a)
-    Display                   // println!("{}", a)
+    Copy +                  // Values must be copyable
+    Add<Output = Self> +    // a + b
+    Sub<Output = Self> +    // a - b
+    Mul<Output = Self> +    // a * b
+    Div<Output = Self> +    // a / b
+    AddAssign +             // a += b
+    SubAssign +             // a -= b
+    MulAssign +             // a *= b
+    DivAssign +             // a /= b
+    Debug +                 // println!("{:?}", a)
+    Display                 // println!("{}", a)
 {
     /// Returns the additive identity (zero) for this type.
-    /// This element satisfies a + zero() = a for all a.
+    /// This element satisfies `a + zero() = a` for all `a`.
     fn zero() -> Self;
 
     /// Returns the multiplicative identity (one) for this type.
-    /// This element satisfies a * one() = a for all a.
+    /// This element satisfies `a * one() = a` for all `a`.
     fn one() -> Self;
 }
 
-/// Implementation of Scalar trait for f32.
+/// Implementation of `Scalar` trait for `f32`.
 impl Scalar for f32 {
     fn zero() -> Self {
         0.0
@@ -71,12 +75,21 @@ mod tests {
 
     #[test]
     fn test_f32_scalar_operations() {
-        let a: f32 = 2.0;
+        let mut a: f32 = 2.0;
         let b: f32 = 3.0;
 
         assert_eq!(a + b, 5.0);
         assert_eq!(a - b, -1.0);
         assert_eq!(a * b, 6.0);
         assert_eq!(a / b, 2.0 / 3.0);
+
+        a += b;
+        assert_eq!(a, 5.0);
+        a -= b;
+        assert_eq!(a, 2.0);
+        a *= b;
+        assert_eq!(a, 6.0);
+        a /= b;
+        assert_eq!(a, 2.0);
     }
 }
