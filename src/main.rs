@@ -2,8 +2,9 @@ use matrix::{Matrix, Scalar, Vector};
 
 /// Demonstrates the features of the Scalar trait and its implementations
 fn type_scalar() {
-    println!("\nScalar Type Demo");
-    println!("-----------------");
+    println!();
+    println!("Scalar Type Demo");
+    println!("----------------");
 
     // Demonstrate identity elements
     let zero = f32::zero();
@@ -25,8 +26,9 @@ fn type_scalar() {
 
 /// Demonstrates the features of the Vector type
 fn type_vector() {
-    println!("\nVector Type Demo");
-    println!("-----------------");
+    println!();
+    println!("Vector Type Demo");
+    println!("----------------");
 
     // Create vectors using different constructors
     println!("Vector construction:");
@@ -46,8 +48,9 @@ fn type_vector() {
 
 /// Demonstrates the features of the Matrix type
 fn type_matrix() {
-    println!("\nMatrix Type Demo");
-    println!("-----------------");
+    println!();
+    println!("Matrix Type Demo");
+    println!("----------------");
 
     // Create matrices using different constructors
     println!("Matrix construction:");
@@ -83,7 +86,7 @@ fn exercise_00() {
 
 fn main() {
     println!("Matrix Library Demo");
-    println!("==================");
+    println!("===================");
 
     type_scalar();
     type_vector();
