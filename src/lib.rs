@@ -11,4 +11,5 @@ mod vector;
 
 pub use matrix::Matrix;
 pub use scalar::Scalar;
+pub use vector::linear_combination;
 pub use vector::Vector;
