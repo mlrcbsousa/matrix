@@ -138,6 +138,10 @@ impl<K: Scalar> Matrix<K> {
     /// Adds another matrix to this one in place.
     /// Both matrices must have the same dimensions.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the total number of elements (rows × columns) - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `other` - The matrix to add to this one.
     ///
@@ -168,6 +172,10 @@ impl<K: Scalar> Matrix<K> {
     /// Subtracts another matrix from this one in place.
     /// Both matrices must have the same dimensions.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the total number of elements (rows × columns) - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `other` - The matrix to subtract from this one.
     ///
@@ -196,6 +204,10 @@ impl<K: Scalar> Matrix<K> {
     }
 
     /// Scales this matrix by a scalar value in place.
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is the total number of elements (rows × columns) - single pass over elements
+    /// - Space: O(1) - no additional space allocated
     ///
     /// # Arguments
     /// * `a` - The scalar value to scale the matrix by.

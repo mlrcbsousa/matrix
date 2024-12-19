@@ -69,6 +69,10 @@ impl<K: Scalar> Vector<K> {
     /// Adds another vector to this one in place.
     /// Both vectors must have the same size.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `other` - The vector to add to this one.
     ///
@@ -97,6 +101,10 @@ impl<K: Scalar> Vector<K> {
     /// Subtracts another vector from this one in place.
     /// Both vectors must have the same size.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `other` - The vector to subtract from this one.
     ///
@@ -123,6 +131,10 @@ impl<K: Scalar> Vector<K> {
     }
 
     /// Scales this vector by a scalar value in place.
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - no additional space allocated
     ///
     /// # Arguments
     /// * `a` - The scalar value to scale the vector by.
