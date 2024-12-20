@@ -240,6 +240,60 @@ fn exercise_02() {
     lerp(m1.clone(), m2.clone(), 1.0).print();
 }
 
+fn exercise_03() {
+    println!();
+    println!("Exercise 03 - Dot Product");
+    println!("-------------------------");
+
+    // Basic vector dot product
+    let v1 = Vector::from([1.0, 2.0, 3.0]);
+    let v2 = Vector::from([4.0, 5.0, 6.0]);
+    println!("\nVector 1:");
+    v1.print();
+    println!("\nVector 2:");
+    v2.print();
+    println!("\nDot product: {}", v1.dot(&v2)); // 32.0
+
+    // Geometric interpretation examples
+    println!("\nGeometric meaning examples:");
+
+    // Orthogonal vectors
+    let v1 = Vector::from([1.0, 0.0]);
+    let v2 = Vector::from([0.0, 1.0]);
+    println!("\nOrthogonal vectors (perpendicular):");
+    println!("v1:");
+    v1.print();
+    println!("v2:");
+    v2.print();
+    println!(
+        "Dot product: {} (zero for perpendicular vectors)",
+        v1.dot(&v2)
+    );
+
+    // Parallel vectors
+    let v1 = Vector::from([2.0, 0.0]);
+    let v2 = Vector::from([4.0, 0.0]);
+    println!("\nParallel vectors (same direction):");
+    println!("v1:");
+    v1.print();
+    println!("v2:");
+    v2.print();
+    println!("Dot product: {} (product of magnitudes)", v1.dot(&v2));
+
+    // Opposite vectors
+    let v1 = Vector::from([1.0, 0.0]);
+    let v2 = Vector::from([-1.0, 0.0]);
+    println!("\nOpposite vectors (opposite directions):");
+    println!("v1:");
+    v1.print();
+    println!("v2:");
+    v2.print();
+    println!(
+        "Dot product: {} (negative for opposing vectors)",
+        v1.dot(&v2)
+    );
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -255,7 +309,7 @@ fn main() {
         Some("ex00") => exercise_00(),
         Some("ex01") => exercise_01(),
         Some("ex02") => exercise_02(),
-        // Some("ex03") => exercise_03(),
+        Some("ex03") => exercise_03(),
         // Some("ex04") => exercise_04(),
         // Some("ex05") => exercise_05(),
         // Some("ex06") => exercise_06(),
@@ -277,7 +331,7 @@ fn main() {
             exercise_00();
             exercise_01();
             exercise_02();
-            // exercise_03();
+            exercise_03();
             // exercise_04();
             // exercise_05();
             // exercise_06();

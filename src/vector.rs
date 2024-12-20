@@ -155,6 +155,45 @@ impl<K: Scalar> Vector<K> {
             *val *= a;
         }
     }
+
+    /// Computes the dot product (inner product) with another vector.
+    ///
+    /// The dot product between vectors u and v is defined as:
+    /// `sum(u[i] * v[i]) for i = 0 to n-1`
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - only stores the accumulator
+    ///
+    /// # Performance Note
+    /// Uses FMA (Fused Multiply-Add) operations for better numerical precision.
+    ///
+    /// # Arguments
+    /// * `other` - The vector to compute dot product with
+    ///
+    /// # Panics
+    /// Panics if vectors have different sizes
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Vector;
+    ///
+    /// let v1 = Vector::from([1.0, 2.0]);
+    /// let v2 = Vector::from([3.0, 4.0]);
+    /// let dot = v1.dot(&v2); // 1.0*3.0 + 2.0*4.0 = 11.0
+    /// ```
+    pub fn dot(&self, other: &Vector<K>) -> K {
+        if self.size() != other.size() {
+            panic!("Dot product requires vectors of the same size");
+        }
+
+        let mut result = K::zero();
+        for (x, y) in self.data.iter().zip(other.data.iter()) {
+            // Use FMA: result = x * y + result
+            result = K::fma(*x, *y, result);
+        }
+        result
+    }
 }
 
 /// Computes a linear combination of vectors.
@@ -425,6 +464,39 @@ mod tests {
             let vectors = [v1, v2];
             let coefs = [1.0, 1.0];
             linear_combination(&vectors, &coefs);
+        }
+    }
+
+    mod dot_product_test {
+        use super::*;
+
+        #[test]
+        fn test_dot_product() {
+            let v1 = Vector::from([1.0, 2.0, 3.0]);
+            let v2 = Vector::from([4.0, 5.0, 6.0]);
+            assert_eq!(v1.dot(&v2), 32.0); // 1*4 + 2*5 + 3*6 = 32
+        }
+
+        #[test]
+        fn test_dot_product_orthogonal() {
+            let v1 = Vector::from([1.0, 0.0]);
+            let v2 = Vector::from([0.0, 1.0]);
+            assert_eq!(v1.dot(&v2), 0.0); // Orthogonal vectors have dot product 0
+        }
+
+        #[test]
+        fn test_dot_product_parallel() {
+            let v1 = Vector::from([2.0, 0.0]);
+            let v2 = Vector::from([3.0, 0.0]);
+            assert_eq!(v1.dot(&v2), 6.0); // Parallel vectors scale dot product
+        }
+
+        #[test]
+        #[should_panic(expected = "Dot product requires vectors of the same size")]
+        fn test_dot_product_different_sizes() {
+            let v1 = Vector::from([1.0, 2.0]);
+            let v2 = Vector::from([1.0, 2.0, 3.0]);
+            v1.dot(&v2);
         }
     }
 }
