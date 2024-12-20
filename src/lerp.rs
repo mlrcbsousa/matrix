@@ -15,11 +15,14 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 /// Both formulas are equivalent, but the second form has a nice geometric
 /// interpretation: weighted average of vectors.
 ///
+/// # Complexity
+/// - Time: O(n) where n is the length - single pass over elements
+/// - Space: O(n) - allocates a new result T
 ///
 /// # Arguments
 /// * `u` - Starting value
 /// * `v` - Ending value
-/// * `t` - Interpolation parameter between 0 and 1
+/// * `t` - Interpolation parameter between 0 and 1 // but works with any value
 ///
 /// # Example
 /// ```
