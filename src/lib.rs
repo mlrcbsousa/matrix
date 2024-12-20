@@ -5,13 +5,13 @@
 //! This library provides implementations for vector and matrix operations
 //! including addition, multiplication, determinants, and more.
 
+mod lerp;
 mod matrix;
 mod scalar;
 mod vector;
-mod lerp;
 
+pub use lerp::lerp;
 pub use matrix::Matrix;
 pub use scalar::Scalar;
 pub use vector::linear_combination;
 pub use vector::Vector;
-pub use lerp::lerp;

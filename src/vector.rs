@@ -5,7 +5,7 @@
 
 use crate::Scalar;
 use std::fmt::{Display, Formatter};
-use std::ops::{AddAssign, SubAssign, MulAssign};
+use std::ops::{AddAssign, MulAssign, SubAssign};
 
 /// A vector of scalar values.
 ///

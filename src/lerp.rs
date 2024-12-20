@@ -32,7 +32,7 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 /// ```
 pub fn lerp<T>(u: T, v: T, t: f32) -> T
 where
-    T: Clone + AddAssign + SubAssign + MulAssign<f32>
+    T: Clone + AddAssign + SubAssign + MulAssign<f32>,
 {
     let mut a = u.clone();
     let mut b = v.clone();
@@ -41,7 +41,6 @@ where
     a += b;
     a
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -1,4 +1,4 @@
-use matrix::{Matrix, Scalar, Vector, linear_combination, lerp};
+use matrix::{lerp, linear_combination, Matrix, Scalar, Vector};
 use std::env;
 
 fn print_usage() {
@@ -251,7 +251,7 @@ fn main() {
             type_scalar();
             type_vector();
             type_matrix();
-        },
+        }
         Some("ex00") => exercise_00(),
         Some("ex01") => exercise_01(),
         Some("ex02") => exercise_02(),
