@@ -5,6 +5,7 @@
 
 use crate::Scalar;
 use std::fmt::{Display, Formatter};
+use std::ops::{AddAssign, SubAssign, MulAssign};
 
 /// A vector of scalar values.
 ///
@@ -18,8 +19,10 @@ use std::fmt::{Display, Formatter};
 /// // Create a vector from a Vec
 /// let v = Vector::from([1.0, 2.0, 3.0]);
 /// ```
+#[derive(Debug, Clone)]
 pub struct Vector<K: Scalar> {
-    data: Vec<K>,
+    /// The data stored in the Vector as a `Vec` of Scalar values.
+    pub data: Vec<K>,
 }
 
 impl<K: Scalar> Vector<K> {
@@ -213,6 +216,27 @@ impl<K: Scalar, const SIZE: usize> From<[K; SIZE]> for Vector<K> {
     }
 }
 
+// Implementations for vector assign multiplication, needed for lerp
+impl<K: Scalar> MulAssign<K> for Vector<K> {
+    fn mul_assign(&mut self, rhs: K) {
+        self.scl(rhs);
+    }
+}
+
+// Implementations for vector assign addition, needed for lerp
+impl<K: Scalar> AddAssign for Vector<K> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.add(&rhs);
+    }
+}
+
+// Implementations for vector assign subtraction, needed for lerp
+impl<K: Scalar> SubAssign for Vector<K> {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.sub(&rhs);
+    }
+}
+
 // Display implementation for Vector
 impl<K: Scalar> Display for Vector<K> {
     /// Formats the `Vector<K>` for display.
@@ -297,6 +321,14 @@ mod tests {
         }
 
         #[test]
+        fn test_vector_add_assign() {
+            let mut v1 = create_test_vector();
+            let v2 = Vector::from([4.0, 5.0, 6.0]);
+            v1 += v2;
+            assert_eq!(v1.data, vec![5.0, 7.0, 9.0]);
+        }
+
+        #[test]
         #[should_panic(expected = "Addition requires vectors of the same size.")]
         fn test_vector_add_panic() {
             let mut v1 = create_test_vector();
@@ -313,6 +345,14 @@ mod tests {
         }
 
         #[test]
+        fn test_vector_sub_assign() {
+            let mut v1 = Vector::from([4.0, 5.0, 6.0]);
+            let v2 = create_test_vector();
+            v1 -= v2;
+            assert_eq!(v1.data, vec![3.0, 3.0, 3.0]);
+        }
+
+        #[test]
         #[should_panic(expected = "Subtraction requires vectors of the same size.")]
         fn test_vector_sub_panic() {
             let mut v1 = create_test_vector();
@@ -324,6 +364,13 @@ mod tests {
         fn test_vector_scl() {
             let mut v = create_test_vector();
             v.scl(2.0);
+            assert_eq!(v.data, vec![2.0, 4.0, 6.0]);
+        }
+
+        #[test]
+        fn test_vector_mul_assign() {
+            let mut v = create_test_vector();
+            v *= 2.0;
             assert_eq!(v.data, vec![2.0, 4.0, 6.0]);
         }
 

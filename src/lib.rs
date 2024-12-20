@@ -8,8 +8,10 @@
 mod matrix;
 mod scalar;
 mod vector;
+mod lerp;
 
 pub use matrix::Matrix;
 pub use scalar::Scalar;
 pub use vector::linear_combination;
 pub use vector::Vector;
+pub use lerp::lerp;

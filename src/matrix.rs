@@ -5,6 +5,7 @@
 
 use crate::Scalar;
 use std::fmt::{Display, Formatter};
+use std::ops::{AddAssign, SubAssign, MulAssign};
 
 /// A matrix of scalar values.
 ///
@@ -21,8 +22,10 @@ use std::fmt::{Display, Formatter};
 ///     [3.0, 4.0]
 /// ]);
 /// ```
+#[derive(Debug, Clone)]
 pub struct Matrix<K: Scalar> {
-    data: Vec<Vec<K>>,
+    /// The data of the matrix stored as a vector of vectors.
+    pub data: Vec<Vec<K>>,
 }
 
 impl<K: Scalar> Matrix<K> {
@@ -238,6 +241,27 @@ impl<K: Scalar, const COLS: usize, const ROWS: usize> From<[[K; COLS]; ROWS]> fo
     }
 }
 
+// Implementations for vector assign multiplication, needed for lerp
+impl<K: Scalar> MulAssign<K> for Matrix<K> {
+    fn mul_assign(&mut self, rhs: K) {
+        self.scl(rhs);
+    }
+}
+
+// Implementations for vector assign addition, needed for lerp
+impl<K: Scalar> AddAssign for Matrix<K> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.add(&rhs);
+    }
+}
+
+// Implementations for vector assign subtraction, needed for lerp
+impl<K: Scalar> SubAssign for Matrix<K> {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.sub(&rhs);
+    }
+}
+
 // For displaying matrices
 impl<K: Scalar> Display for Matrix<K> {
     /// Formats the `Matrix<K>` for display.
@@ -371,6 +395,14 @@ mod tests {
         }
 
         #[test]
+        fn test_matrix_add_assign() {
+            let mut m1 = create_test_matrix();
+            let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+            m1 += m2;
+            assert_eq!(m1.data, vec![vec![6.0, 8.0], vec![10.0, 12.0]]);
+        }
+
+        #[test]
         #[should_panic(expected = "Addition requires matrices with the same shape.")]
         fn test_matrix_add_panic() {
             let mut m1 = create_test_matrix();
@@ -387,6 +419,14 @@ mod tests {
         }
 
         #[test]
+        fn test_matrix_sub_assign() {
+            let mut m1 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+            let m2 = create_test_matrix();
+            m1 -= m2;
+            assert_eq!(m1.data, vec![vec![4.0, 4.0], vec![4.0, 4.0]]);
+        }
+
+        #[test]
         #[should_panic(expected = "Subtraction requires matrices with the same shape.")]
         fn test_matrix_sub_panic() {
             let mut m1 = create_test_matrix();
@@ -398,6 +438,13 @@ mod tests {
         fn test_matrix_scl() {
             let mut m = create_test_matrix();
             m.scl(2.0);
+            assert_eq!(m.data, vec![vec![2.0, 4.0], vec![6.0, 8.0]]);
+        }
+
+        #[test]
+        fn test_matrix_mul_assign() {
+            let mut m = create_test_matrix();
+            m *= 2.0;
             assert_eq!(m.data, vec![vec![2.0, 4.0], vec![6.0, 8.0]]);
         }
 
