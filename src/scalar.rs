@@ -47,6 +47,47 @@ pub trait Scalar:
     /// Returns the multiplicative identity (one) for this type.
     /// This element satisfies `a * one() = a` for all `a`.
     fn one() -> Self;
+
+    /// Performs fused multiply-add: (a * b) + c
+    ///
+    /// This operation is performed in a single step with a single rounding,
+    /// providing better precision than separate multiplication and addition.
+    /// The default implementation multiplies then adds, but specialized
+    /// implementations (like `f32`) use hardware FMA instructions.
+    ///
+    /// # Hardware Implementation
+    /// On x86_64 with FMA support, this maps to SIMD instructions:
+    /// - **vfmadd132ps**: (a * b) + c  where a is the first source operand
+    /// - **vfmadd213ps**: (a * b) + c  where b is the first source operand
+    /// - **vfmadd231ps**: (a * b) + c  where c is the first source operand
+    ///
+    /// Rust provides safe access to these through `mul_add()` on floating point types,
+    /// which internally may use the intrinsic `fmaf32`.
+    ///
+    /// # Performance
+    /// Hardware implementations can be faster than separate multiply and add operations.
+    ///
+    /// # Precision
+    /// FMA provides better precision by eliminating an intermediate rounding step:
+    /// - Regular: (a * b) rounds to N bits, then + c rounds again to N bits
+    /// - FMA: Computes (a * b) + c to full precision before single final rounding
+    ///
+    /// # Arguments
+    /// * `a` - First multiplication operand
+    /// * `b` - Second multiplication operand
+    /// * `c` - Value to add to product
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Scalar;
+    ///
+    /// let result = f32::fma(2.0, 3.0, 4.0); // Computes (2.0 * 3.0) + 4.0 = 10.0
+    /// assert_eq!(result, 10.0);
+    /// ```
+    fn fma(a: Self, b: Self, c: Self) -> Self {
+        // Default implementation - multiply then add
+        (a * b) + c
+    }
 }
 
 /// Implementation of `Scalar` trait for `f32`.
@@ -56,6 +97,13 @@ impl Scalar for f32 {
     }
     fn one() -> Self {
         1.0
+    }
+
+    // Safe, portable FMA using std lib
+    // Internally optimizes to appropriate FMA instruction
+    // stabilized version of fmaf32 intrinsic
+    fn fma(a: Self, b: Self, c: Self) -> Self {
+        a.mul_add(b, c)
     }
 }
 
@@ -91,5 +139,32 @@ mod tests {
         assert_eq!(a, 6.0);
         a /= b;
         assert_eq!(a, 2.0);
+    }
+
+    #[test]
+    fn test_f32_fma() {
+        let a = 2.0f32;
+        let b = 3.0f32;
+        let c = 4.0f32;
+
+        let result = f32::fma(a, b, c);
+        let expected = (a * b) + c;
+
+        assert_eq!(result, expected);
+        assert_eq!(result, 10.0);
+    }
+
+    #[test]
+    fn test_f32_fma_precision() {
+        // Example where FMA provides better precision
+        let a = 0.1f32;
+        let b = 0.2f32;
+        let c = 0.3f32;
+
+        let fma_result = f32::fma(a, b, c);
+        let standard = (a * b) + c;
+
+        // Results may differ slightly due to FMA's single rounding
+        assert!((fma_result - standard).abs() < f32::EPSILON);
     }
 }

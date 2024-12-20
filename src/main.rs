@@ -1,4 +1,18 @@
-use matrix::{Matrix, Scalar, Vector};
+use matrix::{lerp, linear_combination, Matrix, Scalar, Vector};
+use std::env;
+
+fn print_usage() {
+    println!();
+    println!("Usage: matrix [exercise]");
+    println!();
+    println!("Available exercises:");
+    println!("  types   - Scalar, Vector and Matrix types");
+    println!("  ex00    - Add, Subtract and Scale");
+    println!("  ex01    - Linear Combination");
+    println!("  ex02    - Linear Interpolation");
+    println!();
+    println!("If no exercise specified, runs all exercises");
+}
 
 /// Demonstrates the features of the Scalar trait and its implementations
 fn type_scalar() {
@@ -135,12 +149,151 @@ fn exercise_00() {
     m1.print();
 }
 
+fn exercise_01() {
+    println!();
+    println!("Exercise 01 - Linear Combination");
+    println!("--------------------------------");
+
+    // Basic vectors
+    let v1 = Vector::from([1.0, 2.0, 3.0]);
+    let v2 = Vector::from([4.0, 5.0, 6.0]);
+    let vectors = [v1.clone(), v2.clone()];
+    let coefs = [2.0, -1.0];
+
+    println!("\nInput vectors:");
+    println!("Vector 1 (coef = {}):", coefs[0]);
+    v1.print();
+    println!("\nVector 2 (coef = {}):", coefs[1]);
+    v2.print();
+
+    let result = linear_combination(&vectors, &coefs);
+    println!("\nLinear combination result:");
+    result.print();
+
+    // Standard basis example
+    println!("\nStandard basis example:");
+    let e1 = Vector::from([1.0, 0.0, 0.0]);
+    let e2 = Vector::from([0.0, 1.0, 0.0]);
+    let e3 = Vector::from([0.0, 0.0, 1.0]);
+
+    println!("e1:");
+    e1.print();
+    println!("\ne2:");
+    e2.print();
+    println!("\ne3:");
+    e3.print();
+
+    let basis = [e1, e2, e3];
+    let coords = [3.0, -1.0, 2.0];
+
+    println!("\nCoordinates: {:?}", coords);
+    let point = linear_combination(&basis, &coords);
+    println!("\nPoint in R3:");
+    point.print();
+}
+
+fn exercise_02() {
+    println!();
+    println!("Exercise 02 - Linear Interpolation");
+    println!("----------------------------------");
+
+    // Scalar interpolation
+    let a = 0.0f32;
+    let b = 10.0f32;
+    println!("\nScalar interpolation:");
+    println!("Start: {}", a);
+    println!("End: {}", b);
+    println!("t = 0.0: {}", lerp(a, b, 0.0));
+    println!("t = 0.5: {}", lerp(a, b, 0.5));
+    println!("t = 1.0: {}", lerp(a, b, 1.0));
+
+    // Vector interpolation
+    let v1 = Vector::from([1.0, 2.0]);
+    let v2 = Vector::from([5.0, 6.0]);
+    println!("\nVector interpolation:");
+    println!("Start vector:");
+    v1.print();
+    println!("\nEnd vector:");
+    v2.print();
+
+    println!("\nt = 0.0:");
+    lerp(v1.clone(), v2.clone(), 0.0).print();
+    println!("\nt = 0.5:");
+    lerp(v1.clone(), v2.clone(), 0.5).print();
+    println!("\nt = 1.0:");
+    lerp(v1.clone(), v2.clone(), 1.0).print();
+
+    // Matrix interpolation
+    let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+    println!("\nMatrix interpolation:");
+    println!("Start matrix:");
+    m1.print();
+    println!("\nEnd matrix:");
+    m2.print();
+
+    println!("\nt = 0.0:");
+    lerp(m1.clone(), m2.clone(), 0.0).print();
+    println!("\nt = 0.5:");
+    lerp(m1.clone(), m2.clone(), 0.5).print();
+    println!("\nt = 1.0:");
+    lerp(m1.clone(), m2.clone(), 1.0).print();
+}
+
 fn main() {
+    let args: Vec<String> = env::args().collect();
+
     println!("Matrix Library Demo");
     println!("===================");
 
-    type_scalar();
-    type_vector();
-    type_matrix();
-    exercise_00();
+    match args.get(1).map(|s| s.as_str()) {
+        Some("types") => {
+            type_scalar();
+            type_vector();
+            type_matrix();
+        }
+        Some("ex00") => exercise_00(),
+        Some("ex01") => exercise_01(),
+        Some("ex02") => exercise_02(),
+        // Some("ex03") => exercise_03(),
+        // Some("ex04") => exercise_04(),
+        // Some("ex05") => exercise_05(),
+        // Some("ex06") => exercise_06(),
+        // Some("ex07") => exercise_07(),
+        // Some("ex08") => exercise_08(),
+        // Some("ex09") => exercise_09(),
+        // Some("ex10") => exercise_10(),
+        // Some("ex11") => exercise_11(),
+        // Some("ex12") => exercise_12(),
+        // Some("ex13") => exercise_13(),
+        // Some("ex14") => exercise_14(),
+        // Some("ex15") => exercise_15(),
+        Some("--help" | "-h") => print_usage(),
+        None => {
+            // Run all exercises
+            type_scalar();
+            type_vector();
+            type_matrix();
+            exercise_00();
+            exercise_01();
+            exercise_02();
+            // exercise_03();
+            // exercise_04();
+            // exercise_05();
+            // exercise_06();
+            // exercise_07();
+            // exercise_08();
+            // exercise_09();
+            // exercise_10();
+            // exercise_11();
+            // exercise_12();
+            // exercise_13();
+            // exercise_14();
+            // exercise_15();
+        }
+        Some(arg) => {
+            println!("Unknown exercise: {}", arg);
+            print_usage();
+        }
+    }
 }

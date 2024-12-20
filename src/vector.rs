@@ -5,6 +5,7 @@
 
 use crate::Scalar;
 use std::fmt::{Display, Formatter};
+use std::ops::{AddAssign, MulAssign, SubAssign};
 
 /// A vector of scalar values.
 ///
@@ -18,8 +19,10 @@ use std::fmt::{Display, Formatter};
 /// // Create a vector from a Vec
 /// let v = Vector::from([1.0, 2.0, 3.0]);
 /// ```
+#[derive(Debug, Clone)]
 pub struct Vector<K: Scalar> {
-    data: Vec<K>,
+    /// The data stored in the Vector as a `Vec` of Scalar values.
+    pub data: Vec<K>,
 }
 
 impl<K: Scalar> Vector<K> {
@@ -69,6 +72,10 @@ impl<K: Scalar> Vector<K> {
     /// Adds another vector to this one in place.
     /// Both vectors must have the same size.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `other` - The vector to add to this one.
     ///
@@ -97,6 +104,10 @@ impl<K: Scalar> Vector<K> {
     /// Subtracts another vector from this one in place.
     /// Both vectors must have the same size.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `other` - The vector to subtract from this one.
     ///
@@ -124,6 +135,10 @@ impl<K: Scalar> Vector<K> {
 
     /// Scales this vector by a scalar value in place.
     ///
+    /// # Complexity
+    /// - Time: O(n) where n is the vector length - single pass over elements
+    /// - Space: O(1) - no additional space allocated
+    ///
     /// # Arguments
     /// * `a` - The scalar value to scale the vector by.
     ///
@@ -142,12 +157,83 @@ impl<K: Scalar> Vector<K> {
     }
 }
 
+/// Computes a linear combination of vectors.
+///
+/// # Complexity
+/// - Time: O(n) where n is the vector length - single pass over elements
+/// - Space: O(n) - allocates a new result vector
+///
+/// # Arguments
+/// * `u` - Array slice of vectors
+/// * `coefs` - Array slice of coefficients corresponding to each vector
+///
+/// # Panics
+/// - If the number of vectors and coefficients don't match
+/// - If vectors have different sizes
+///
+/// # Example
+/// ```
+/// use matrix::{Vector, linear_combination};
+///
+/// let v1 = Vector::from([1.0, 2.0]);
+/// let v2 = Vector::from([3.0, 4.0]);
+/// let vectors = [v1, v2];
+/// let coefs = [2.0, -1.0];
+///
+/// let result = linear_combination(&vectors, &coefs);
+/// // result is [-1.0, 0.0] = 2.0 * [1.0, 2.0] + (-1.0) * [3.0, 4.0]
+/// ```
+pub fn linear_combination<K: Scalar>(u: &[Vector<K>], coefs: &[K]) -> Vector<K> {
+    // Verify inputs
+    if u.is_empty() || coefs.is_empty() || u.len() != coefs.len() {
+        panic!("Linear combination requires equal non-zero number of vectors and coefficients");
+    }
+
+    let size = u[0].size();
+    if !u.iter().all(|v| v.size() == size) {
+        panic!("All vectors must have the same size");
+    }
+
+    // Initialize result vector with zeros
+    let mut result = vec![K::zero(); size];
+
+    // Use FMA for more accurate accumulation if available
+    for (vector, &coef) in u.iter().zip(coefs.iter()) {
+        for (r, &el) in result.iter_mut().zip(vector.data.iter()) {
+            *r = K::fma(coef, el, *r); // coef * el + previous_result
+        }
+    }
+
+    Vector::new(result)
+}
+
 // Implementation for initializing a Vector with an array
 impl<K: Scalar, const SIZE: usize> From<[K; SIZE]> for Vector<K> {
     fn from(data: [K; SIZE]) -> Self {
         Self {
             data: data.to_vec(),
         }
+    }
+}
+
+// Implementations for vector assign multiplication, needed for lerp
+impl<K: Scalar> MulAssign<K> for Vector<K> {
+    fn mul_assign(&mut self, rhs: K) {
+        self.scl(rhs);
+    }
+}
+
+// Implementations for vector assign addition, needed for lerp
+impl<K: Scalar> AddAssign for Vector<K> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.add(&rhs);
+    }
+}
+
+// Implementations for vector assign subtraction, needed for lerp
+impl<K: Scalar> SubAssign for Vector<K> {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.sub(&rhs);
     }
 }
 
@@ -235,6 +321,14 @@ mod tests {
         }
 
         #[test]
+        fn test_vector_add_assign() {
+            let mut v1 = create_test_vector();
+            let v2 = Vector::from([4.0, 5.0, 6.0]);
+            v1 += v2;
+            assert_eq!(v1.data, vec![5.0, 7.0, 9.0]);
+        }
+
+        #[test]
         #[should_panic(expected = "Addition requires vectors of the same size.")]
         fn test_vector_add_panic() {
             let mut v1 = create_test_vector();
@@ -247,6 +341,14 @@ mod tests {
             let mut v1 = Vector::from([4.0, 5.0, 6.0]);
             let v2 = create_test_vector();
             v1.sub(&v2);
+            assert_eq!(v1.data, vec![3.0, 3.0, 3.0]);
+        }
+
+        #[test]
+        fn test_vector_sub_assign() {
+            let mut v1 = Vector::from([4.0, 5.0, 6.0]);
+            let v2 = create_test_vector();
+            v1 -= v2;
             assert_eq!(v1.data, vec![3.0, 3.0, 3.0]);
         }
 
@@ -266,10 +368,63 @@ mod tests {
         }
 
         #[test]
+        fn test_vector_mul_assign() {
+            let mut v = create_test_vector();
+            v *= 2.0;
+            assert_eq!(v.data, vec![2.0, 4.0, 6.0]);
+        }
+
+        #[test]
         fn test_vector_zero_scale() {
             let mut v = create_test_vector();
             v.scl(0.0);
             assert_eq!(v.data, vec![0.0, 0.0, 0.0]);
+        }
+    }
+
+    mod linear_combination_tests {
+        use super::*;
+
+        #[test]
+        fn test_linear_combination() {
+            let v1 = Vector::from([1.0, 2.0]);
+            let v2 = Vector::from([3.0, 4.0]);
+            let vectors = [v1, v2];
+            let coefs = [2.0, -1.0];
+
+            let result = linear_combination(&vectors, &coefs);
+            assert_eq!(result.data, vec![-1.0, 0.0]);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Linear combination requires equal non-zero number of vectors and coefficients"
+        )]
+        fn test_linear_combination_empty() {
+            let vectors: [Vector<f32>; 0] = [];
+            let coefs: [f32; 0] = [];
+            linear_combination(&vectors, &coefs);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Linear combination requires equal non-zero number of vectors and coefficients"
+        )]
+        fn test_linear_combination_mismatched_lengths() {
+            let v = Vector::from([1.0, 2.0]);
+            let vectors = [v];
+            let coefs = [1.0, 2.0];
+            linear_combination(&vectors, &coefs);
+        }
+
+        #[test]
+        #[should_panic(expected = "All vectors must have the same size")]
+        fn test_linear_combination_different_sizes() {
+            let v1 = Vector::from([1.0, 2.0]);
+            let v2 = Vector::from([3.0]);
+            let vectors = [v1, v2];
+            let coefs = [1.0, 1.0];
+            linear_combination(&vectors, &coefs);
         }
     }
 }
