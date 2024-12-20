@@ -265,7 +265,10 @@ fn exercise_03() {
     v1.print();
     println!("v2:");
     v2.print();
-    println!("Dot product: {} (zero for perpendicular vectors)", v1.dot(&v2));
+    println!(
+        "Dot product: {} (zero for perpendicular vectors)",
+        v1.dot(&v2)
+    );
 
     // Parallel vectors
     let v1 = Vector::from([2.0, 0.0]);
@@ -285,7 +288,10 @@ fn exercise_03() {
     v1.print();
     println!("v2:");
     v2.print();
-    println!("Dot product: {} (negative for opposing vectors)", v1.dot(&v2));
+    println!(
+        "Dot product: {} (negative for opposing vectors)",
+        v1.dot(&v2)
+    );
 }
 
 fn main() {

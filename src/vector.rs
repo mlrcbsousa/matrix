@@ -159,7 +159,7 @@ impl<K: Scalar> Vector<K> {
     /// Computes the dot product (inner product) with another vector.
     ///
     /// The dot product between vectors u and v is defined as:
-    /// sum(u[i] * v[i]) for i = 0 to n-1
+    /// `sum(u[i] * v[i]) for i = 0 to n-1`
     ///
     /// # Complexity
     /// - Time: O(n) where n is the vector length - single pass over elements
