@@ -655,39 +655,26 @@ mod tests {
 
         #[test]
         fn test_trace_2x2() {
-            let m = Matrix::from([
-                [1.0, 2.0],
-                [3.0, 4.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
             assert_eq!(m.trace(), 5.0);
         }
 
         #[test]
         fn test_trace_identity() {
-            let m = Matrix::from([
-                [1.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0],
-                [0.0, 0.0, 1.0]
-            ]);
+            let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
             assert_eq!(m.trace(), 3.0);
         }
 
         #[test]
         fn test_trace_zero() {
-            let m = Matrix::from([
-                [0.0, 1.0],
-                [1.0, 0.0]
-            ]);
+            let m = Matrix::from([[0.0, 1.0], [1.0, 0.0]]);
             assert_eq!(m.trace(), 0.0);
         }
 
         #[test]
         #[should_panic(expected = "Trace only defined for square matrices")]
         fn test_trace_non_square() {
-            let m = Matrix::from([
-                [1.0, 2.0, 3.0],
-                [4.0, 5.0, 6.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             m.trace();
         }
     }

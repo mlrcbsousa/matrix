@@ -494,39 +494,25 @@ fn exercise_08() {
     println!("-------------------");
 
     // Basic trace example
-    let m1 = Matrix::from([
-        [1.0, 2.0],
-        [3.0, 4.0]
-    ]);
+    let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
     println!("\nMatrix:");
     m1.print();
     println!("Trace: {}", m1.trace()); // 5.0
 
     // Identity matrix trace equals dimension
-    let identity = Matrix::from([
-        [1.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0],
-        [0.0, 0.0, 1.0]
-    ]);
+    let identity = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
     println!("\nIdentity matrix (3x3):");
     identity.print();
     println!("Trace: {} (equals matrix dimension)", identity.trace()); // 3.0
 
     // Diagonal matrix
-    let diagonal = Matrix::from([
-        [2.0, 0.0, 0.0],
-        [0.0, 3.0, 0.0],
-        [0.0, 0.0, 4.0]
-    ]);
+    let diagonal = Matrix::from([[2.0, 0.0, 0.0], [0.0, 3.0, 0.0], [0.0, 0.0, 4.0]]);
     println!("\nDiagonal matrix:");
     diagonal.print();
     println!("Trace: {} (sum of diagonal elements)", diagonal.trace()); // 9.0
 
     // Symmetric matrix
-    let symmetric = Matrix::from([
-        [1.0, 2.0],
-        [2.0, 1.0]
-    ]);
+    let symmetric = Matrix::from([[1.0, 2.0], [2.0, 1.0]]);
     println!("\nSymmetric matrix:");
     symmetric.print();
     println!("Trace: {}", symmetric.trace()); // 2.0
