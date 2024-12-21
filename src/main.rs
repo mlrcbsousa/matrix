@@ -294,6 +294,38 @@ fn exercise_03() {
     );
 }
 
+fn exercise_04() {
+    println!();
+    println!("Exercise 04 - Norm");
+    println!("------------------");
+
+    // Create test vectors
+    let v1 = Vector::from([1.0, 2.0, 2.0]);
+    let v2 = Vector::from([-4.0, 0.0, 3.0]);
+
+    println!("\nVector 1:");
+    v1.print();
+    println!("Manhattan norm (1-norm):   {}", v1.norm_1());    // 5.0
+    println!("Euclidean norm (2-norm):   {}", v1.norm());      // 3.0
+    println!("Supremum norm (inf-norm):  {}", v1.norm_inf());  // 2.0
+
+    println!("\nVector 2:");
+    v2.print();
+    println!("Manhattan norm (1-norm):   {}", v2.norm_1());    // 7.0
+    println!("Euclidean norm (2-norm):   {}", v2.norm());      // 5.0
+    println!("Supremum norm (inf-norm):  {}", v2.norm_inf());  // 4.0
+
+    // Demonstrate relationships between norms
+    println!("\nRelationships between norms:");
+    println!("For any vector v: ∥v∥∞ ≤ ∥v∥₂ ≤ ∥v∥₁");
+
+    let v3 = Vector::from([3.0, -4.0]);
+    println!("\nVector:");
+    v3.print();
+    println!("∥v∥∞ = {} ≤ ∥v∥₂ = {} ≤ ∥v∥₁ = {}",
+        v3.norm_inf(), v3.norm(), v3.norm_1());
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -310,7 +342,7 @@ fn main() {
         Some("ex01") => exercise_01(),
         Some("ex02") => exercise_02(),
         Some("ex03") => exercise_03(),
-        // Some("ex04") => exercise_04(),
+        Some("ex04") => exercise_04(),
         // Some("ex05") => exercise_05(),
         // Some("ex06") => exercise_06(),
         // Some("ex07") => exercise_07(),
@@ -332,7 +364,7 @@ fn main() {
             exercise_01();
             exercise_02();
             exercise_03();
-            // exercise_04();
+            exercise_04();
             // exercise_05();
             // exercise_06();
             // exercise_07();
