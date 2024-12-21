@@ -321,6 +321,41 @@ impl<K: Scalar> Matrix<K> {
 
         Matrix::new(result)
     }
+
+    /// Computes the trace of this matrix.
+    ///
+    /// The trace is the sum of elements on the main diagonal:
+    /// tr(A) = Σᵢaᵢᵢ
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is the matrix dimension
+    /// - Space: O(1) - only stores accumulator
+    ///
+    /// # Panics
+    /// * If matrix is not square
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let m = Matrix::from([
+    ///     [1.0, 2.0],
+    ///     [3.0, 4.0]
+    /// ]);
+    /// let tr = m.trace(); // Returns 5.0 (1.0 + 4.0)
+    /// ```
+    pub fn trace(&self) -> K {
+        if !self.is_square() {
+            panic!("Trace only defined for square matrices");
+        }
+
+        let n = self.rows();
+        let mut sum = K::zero();
+        for i in 0..n {
+            sum += self.data[i][i];
+        }
+        sum
+    }
 }
 
 // Implementation for initializing a Matrix with arrays
@@ -612,6 +647,48 @@ mod tests {
             let m1 = Matrix::from([[1.0, 2.0]]);
             let m2 = Matrix::from([[1.0], [2.0], [3.0]]);
             m1.mul_mat(&m2);
+        }
+    }
+
+    mod trace_tests {
+        use super::*;
+
+        #[test]
+        fn test_trace_2x2() {
+            let m = Matrix::from([
+                [1.0, 2.0],
+                [3.0, 4.0]
+            ]);
+            assert_eq!(m.trace(), 5.0);
+        }
+
+        #[test]
+        fn test_trace_identity() {
+            let m = Matrix::from([
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0]
+            ]);
+            assert_eq!(m.trace(), 3.0);
+        }
+
+        #[test]
+        fn test_trace_zero() {
+            let m = Matrix::from([
+                [0.0, 1.0],
+                [1.0, 0.0]
+            ]);
+            assert_eq!(m.trace(), 0.0);
+        }
+
+        #[test]
+        #[should_panic(expected = "Trace only defined for square matrices")]
+        fn test_trace_non_square() {
+            let m = Matrix::from([
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0]
+            ]);
+            m.trace();
         }
     }
 }

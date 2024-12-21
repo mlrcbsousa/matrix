@@ -488,6 +488,50 @@ fn exercise_07() {
     m1.mul_mat(&identity).print();
 }
 
+fn exercise_08() {
+    println!();
+    println!("Exercise 08 - Trace");
+    println!("-------------------");
+
+    // Basic trace example
+    let m1 = Matrix::from([
+        [1.0, 2.0],
+        [3.0, 4.0]
+    ]);
+    println!("\nMatrix:");
+    m1.print();
+    println!("Trace: {}", m1.trace()); // 5.0
+
+    // Identity matrix trace equals dimension
+    let identity = Matrix::from([
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0]
+    ]);
+    println!("\nIdentity matrix (3x3):");
+    identity.print();
+    println!("Trace: {} (equals matrix dimension)", identity.trace()); // 3.0
+
+    // Diagonal matrix
+    let diagonal = Matrix::from([
+        [2.0, 0.0, 0.0],
+        [0.0, 3.0, 0.0],
+        [0.0, 0.0, 4.0]
+    ]);
+    println!("\nDiagonal matrix:");
+    diagonal.print();
+    println!("Trace: {} (sum of diagonal elements)", diagonal.trace()); // 9.0
+
+    // Symmetric matrix
+    let symmetric = Matrix::from([
+        [1.0, 2.0],
+        [2.0, 1.0]
+    ]);
+    println!("\nSymmetric matrix:");
+    symmetric.print();
+    println!("Trace: {}", symmetric.trace()); // 2.0
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -508,7 +552,7 @@ fn main() {
         Some("ex05") => exercise_05(),
         Some("ex06") => exercise_06(),
         Some("ex07") => exercise_07(),
-        // Some("ex08") => exercise_08(),
+        Some("ex08") => exercise_08(),
         // Some("ex09") => exercise_09(),
         // Some("ex10") => exercise_10(),
         // Some("ex11") => exercise_11(),
@@ -530,7 +574,7 @@ fn main() {
             exercise_05();
             exercise_06();
             exercise_07();
-            // exercise_08();
+            exercise_08();
             // exercise_09();
             // exercise_10();
             // exercise_11();
