@@ -194,6 +194,81 @@ impl<K: Scalar> Vector<K> {
         }
         result
     }
+
+    /// Computes the Manhattan norm (1-norm) of this vector.
+    ///
+    /// The Manhattan norm is the sum of the absolute values of vector components:
+    /// ∥v∥₁ = Σ|vᵢ|
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is vector length - single pass over elements
+    /// - Space: O(1) - only accumulator storage needed
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Vector;
+    ///
+    /// let v = Vector::from([3.0, -4.0]);
+    /// let norm = v.norm_1(); // Returns 7.0 (|3| + |-4|)
+    /// ```
+    pub fn norm_1(&self) -> f32 {
+        let mut sum: f32 = 0.0;
+        for val in &self.data {
+            sum += Into::<f32>::into(*val).abs();
+        }
+        sum
+    }
+
+    /// Computes the Euclidean norm (2-norm) of this vector.
+    ///
+    /// The Euclidean norm is the square root of the sum of squared components:
+    /// ∥v∥₂ = √(Σvᵢ²)
+    ///
+    /// Uses FMA for better numerical precision when computing sum of squares.
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is vector length - single pass over elements
+    /// - Space: O(1) - only accumulator storage needed
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Vector;
+    ///
+    /// let v = Vector::from([3.0, 4.0]);
+    /// let norm = v.norm(); // Returns 5.0 (√(3² + 4²))
+    /// ```
+    pub fn norm(&self) -> f32 {
+        let mut sum_sq: f32 = 0.0;
+        for val in &self.data {
+            let val_f32: f32 = (*val).into();
+            // Use FMA for sum of squares: val² + previous_sum
+            sum_sq = f32::fma(val_f32, val_f32, sum_sq);
+        }
+        sum_sq.sqrt()
+    }
+
+    /// Computes the supremum norm (infinity norm) of this vector.
+    ///
+    /// The supremum norm is the maximum absolute value of vector components:
+    /// ∥v∥∞ = max(|vᵢ|)
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is vector length - single pass over elements
+    /// - Space: O(1) - only stores current maximum
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Vector;
+    ///
+    /// let v = Vector::from([1.0, -5.0, 3.0]);
+    /// let norm = v.norm_inf(); // Returns 5.0 (max(|1|, |-5|, |3|))
+    /// ```
+    pub fn norm_inf(&self) -> f32 {
+        self.data
+            .iter()
+            .map(|val| Into::<f32>::into(*val).abs())
+            .fold(0.0, f32::max)
+    }
 }
 
 /// Computes a linear combination of vectors.
@@ -497,6 +572,60 @@ mod tests {
             let v1 = Vector::from([1.0, 2.0]);
             let v2 = Vector::from([1.0, 2.0, 3.0]);
             v1.dot(&v2);
+        }
+    }
+
+    #[cfg(test)]
+    mod norms_tests {
+        use super::*;
+
+        #[test]
+        fn test_norm_1() {
+            let v = Vector::from([1.0, -2.0, 3.0]);
+            assert_eq!(v.norm_1(), 6.0);
+
+            let v = Vector::from([-1.0, -1.0]);
+            assert_eq!(v.norm_1(), 2.0);
+
+            let v = Vector::from([0.0, 0.0, 0.0]);
+            assert_eq!(v.norm_1(), 0.0);
+        }
+
+        #[test]
+        fn test_norm_2() {
+            let v = Vector::from([3.0, 4.0]);
+            assert_eq!(v.norm(), 5.0);
+
+            let v = Vector::from([1.0, 1.0, 1.0]);
+            assert!((v.norm() - 3_f32.sqrt()).abs() < f32::EPSILON);
+
+            let v = Vector::from([0.0, 0.0]);
+            assert_eq!(v.norm(), 0.0);
+        }
+
+        #[test]
+        fn test_norm_inf() {
+            let v = Vector::from([1.0, -5.0, 3.0]);
+            assert_eq!(v.norm_inf(), 5.0);
+
+            let v = Vector::from([-2.0, 2.0]);
+            assert_eq!(v.norm_inf(), 2.0);
+
+            let v = Vector::from([0.0, 0.0, 0.0]);
+            assert_eq!(v.norm_inf(), 0.0);
+        }
+
+        #[test]
+        fn test_relationship_between_norms() {
+            // For any vector v in R^n: ∥v∥∞ ≤ ∥v∥₂ ≤ ∥v∥₁
+            let v = Vector::from([1.0, 2.0, -3.0]);
+
+            let norm_inf = v.norm_inf();
+            let norm_2 = v.norm();
+            let norm_1 = v.norm_1();
+
+            assert!(norm_inf <= norm_2);
+            assert!(norm_2 <= norm_1);
         }
     }
 }

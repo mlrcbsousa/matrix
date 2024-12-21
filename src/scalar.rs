@@ -38,7 +38,8 @@ pub trait Scalar:
     MulAssign +             // a *= b
     DivAssign +             // a /= b
     Debug +                 // println!("{:?}", a)
-    Display                 // println!("{}", a)
+    Display +               // println!("{}", a)
+    Into<f32>               // Convert to f32
 {
     /// Returns the additive identity (zero) for this type.
     /// This element satisfies `a + zero() = a` for all `a`.
