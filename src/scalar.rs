@@ -7,7 +7,7 @@
 //! - Formatting capabilities (Debug and Display)
 
 use std::fmt::{Debug, Display};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// A type that can be used as a scalar in linear algebra operations.
 ///
@@ -39,7 +39,8 @@ pub trait Scalar:
     DivAssign +             // a /= b
     Debug +                 // println!("{:?}", a)
     Display +               // println!("{}", a)
-    Into<f32>               // Convert to f32
+    Into<f32> +             // Convert to f32
+    Neg<Output = Self>      // -a
 {
     /// Returns the additive identity (zero) for this type.
     /// This element satisfies `a + zero() = a` for all `a`.

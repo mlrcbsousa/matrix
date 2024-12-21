@@ -365,6 +365,49 @@ pub fn angle_cos<K: Scalar>(u: &Vector<K>, v: &Vector<K>) -> f32 {
     Into::<f32>::into(dot) / (norm_u * norm_v)
 }
 
+/// Computes the cross product of two 3D vectors.
+///
+/// The cross product u × v is defined as:
+/// ```txt
+/// [u₂v₃ - u₃v₂, u₃v₁ - u₁v₃, u₁v₂ - u₂v₁]
+/// ```
+/// where u = [u₁, u₂, u₃] and v = [v₁, v₂, v₃]
+///
+/// The resulting vector is perpendicular to both input vectors
+/// with magnitude equal to the area of the parallelogram they span.
+///
+/// # Arguments
+/// * `u` - First 3D vector
+/// * `v` - Second 3D vector
+///
+/// # Panics
+/// * If either vector is not 3D
+///
+/// # Example
+/// ```
+/// use matrix::{Vector, cross_product};
+///
+/// let u = Vector::from([1.0, 0.0, 0.0]);  // i unit vector
+/// let v = Vector::from([0.0, 1.0, 0.0]);  // j unit vector
+/// let w = cross_product(&u, &v);          // k unit vector [0.0, 0.0, 1.0]
+/// ```
+pub fn cross_product<K: Scalar>(u: &Vector<K>, v: &Vector<K>) -> Vector<K> {
+    if u.size() != 3 || v.size() != 3 {
+        panic!("Cross product requires 3D vectors");
+    }
+
+    // Get components using array indexing
+    let (u1, u2, u3) = (u.data[0], u.data[1], u.data[2]);
+    let (v1, v2, v3) = (v.data[0], v.data[1], v.data[2]);
+
+    // Calculate components using FMA where possible
+    let x = K::fma(u2, v3, -(u3 * v2));
+    let y = K::fma(u3, v1, -(u1 * v3));
+    let z = K::fma(u1, v2, -(u2 * v1));
+
+    Vector::from([x, y, z])
+}
+
 // Implementation for initializing a Vector with an array
 impl<K: Scalar, const SIZE: usize> From<[K; SIZE]> for Vector<K> {
     fn from(data: [K; SIZE]) -> Self {
@@ -586,7 +629,7 @@ mod tests {
         }
     }
 
-    mod dot_product_test {
+    mod dot_product_tests {
         use super::*;
 
         #[test]
@@ -718,6 +761,65 @@ mod tests {
             let v1 = Vector::from([1.0, 0.0]);
             let v2 = Vector::from([1.0]);
             angle_cos(&v1, &v2);
+        }
+    }
+
+    mod cross_product_tests {
+        use super::*;
+
+        #[test]
+        fn test_cross_unit_vectors() {
+            // i × j = k
+            let i = Vector::from([1.0, 0.0, 0.0]);
+            let j = Vector::from([0.0, 1.0, 0.0]);
+            let k = Vector::from([0.0, 0.0, 1.0]);
+
+            assert_eq!(cross_product(&i, &j).data, k.data);
+            // j × k = i
+            assert_eq!(cross_product(&j, &k).data, i.data);
+            // k × i = j
+            assert_eq!(cross_product(&k, &i).data, j.data);
+        }
+
+        #[test]
+        fn test_cross_anticommutative() {
+            // u × v = -(v × u)
+            let u = Vector::from([2.0, 3.0, 4.0]);
+            let v = Vector::from([5.0, 6.0, 7.0]);
+
+            let uv = cross_product(&u, &v);
+            let vu = cross_product(&v, &u);
+
+            for (a, b) in uv.data.iter().zip(vu.data.iter()) {
+                assert!((*a + *b).abs() < f32::EPSILON);
+            }
+        }
+
+        #[test]
+        fn test_cross_orthogonal() {
+            // (u × v) · u = 0 and (u × v) · v = 0
+            let u = Vector::from([1.0, 2.0, 3.0]);
+            let v = Vector::from([4.0, 5.0, 6.0]);
+            let expected = Vector::from([-3.0, 6.0, -3.0]);
+            let result = cross_product(&u, &v);
+            assert_eq!(result.data, expected.data);
+        }
+
+        #[test]
+        fn test_cross_example() {
+            let u = Vector::from([4.0, 2.0, -3.0]);
+            let v = Vector::from([-2.0, -5.0, 16.0]);
+            let expected = Vector::from([17.0, -58.0, -16.0]);
+            let result = cross_product(&u, &v);
+            assert_eq!(result.data, expected.data);
+        }
+
+        #[test]
+        #[should_panic(expected = "Cross product requires 3D vectors")]
+        fn test_cross_wrong_dimension() {
+            let u = Vector::from([1.0, 0.0]);
+            let v = Vector::from([0.0, 1.0]);
+            cross_product(&u, &v);
         }
     }
 }
