@@ -380,7 +380,7 @@ fn exercise_05() {
 fn exercise_06() {
     println!();
     println!("Exercise 06 - Cross Product");
-    println!("-------------------------");
+    println!("---------------------------");
 
     // Standard basis vectors
     let i = Vector::from([1.0, 0.0, 0.0]);
