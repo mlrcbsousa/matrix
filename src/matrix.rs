@@ -3,7 +3,7 @@
 //! Provides a generic Matrix type that works with any Scalar type.
 //! Includes basic matrix operations and utilities.
 
-use crate::Scalar;
+use crate::{Scalar, Vector};
 use std::fmt::{Display, Formatter};
 use std::ops::{AddAssign, MulAssign, SubAssign};
 
@@ -230,6 +230,97 @@ impl<K: Scalar> Matrix<K> {
             }
         }
     }
+
+    /// Multiplies this matrix by a vector (matrix-vector multiplication).
+    ///
+    /// For a matrix A and vector x, computes Ax where:
+    /// (Ax)ᵢ = Σⱼ(aᵢⱼxⱼ)
+    ///
+    /// # Complexity
+    /// - Time: O(nm) where n = rows, m = cols
+    /// - Space: O(nm) for storing result
+    ///
+    /// # Arguments
+    /// * `vec` - Vector to multiply with (must have same size as matrix columns)
+    ///
+    /// # Panics
+    /// * If matrix columns don't match vector size
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::{Matrix, Vector};
+    ///
+    /// let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    /// let v = Vector::from([1.0, 2.0]);
+    /// let result = m.mul_vec(&v); // [5.0, 11.0]
+    /// ```
+    pub fn mul_vec(&self, vec: &Vector<K>) -> Vector<K> {
+        if self.cols() != vec.size() {
+            panic!("Matrix columns must match vector size");
+        }
+
+        let mut result = vec![K::zero(); self.rows()];
+
+        // For each row of matrix
+        for i in 0..self.rows() {
+            // Compute dot product with vector
+            for (j, v_j) in vec.data.iter().enumerate() {
+                result[i] = K::fma(self.data[i][j], *v_j, result[i]);
+            }
+        }
+
+        Vector::new(result)
+    }
+
+    /// Multiplies this matrix by another matrix (matrix-matrix multiplication).
+    ///
+    /// For matrices A and B, computes AB where:
+    /// (AB)ᵢⱼ = Σₖ(aᵢₖbₖⱼ)
+    ///
+    /// # Complexity
+    /// - Time: O(nmp) where:
+    ///   - n = rows of first matrix
+    ///   - m = cols of first matrix / rows of second matrix
+    ///   - p = cols of second matrix
+    /// - Space: O(nm + mp + np) for intermediate and result storage
+    ///
+    /// # Arguments
+    /// * `other` - Matrix to multiply with (columns must match this matrix's rows)
+    ///
+    /// # Panics
+    /// * If matrix dimensions don't match for multiplication
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    /// let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+    /// let result = m1.mul_mat(&m2); // [[19.0, 22.0], [43.0, 50.0]]
+    /// ```
+    pub fn mul_mat(&self, other: &Matrix<K>) -> Matrix<K> {
+        if self.cols() != other.rows() {
+            panic!("First matrix columns must match second matrix rows");
+        }
+
+        let n = self.rows();
+        let m = self.cols();
+        let p = other.cols();
+
+        let mut result = vec![vec![K::zero(); p]; n];
+
+        // For each element of result matrix
+        for i in 0..n {
+            for j in 0..p {
+                // Compute dot product of row i from first and col j from second
+                for k in 0..m {
+                    result[i][j] = K::fma(self.data[i][k], other.data[k][j], result[i][j]);
+                }
+            }
+        }
+
+        Matrix::new(result)
+    }
 }
 
 // Implementation for initializing a Matrix with arrays
@@ -453,6 +544,74 @@ mod tests {
             let mut m = create_test_matrix();
             m.scl(0.0);
             assert_eq!(m.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
+        }
+    }
+
+    mod matrix_multiplication_tests {
+        use super::*;
+
+        #[test]
+        fn test_matrix_vector_multiplication() {
+            let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+            let v = Vector::from([1.0, 2.0]);
+            let result = m.mul_vec(&v);
+            assert_eq!(result.data, vec![5.0, 11.0]);
+        }
+
+        #[test]
+        fn test_matrix_vector_identity() {
+            let m = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+            let v = Vector::from([1.0, 2.0]);
+            let result = m.mul_vec(&v);
+            assert_eq!(result.data, v.data);
+        }
+
+        #[test]
+        fn test_matrix_vector_zero() {
+            let m = Matrix::from([[0.0, 0.0], [0.0, 0.0]]);
+            let v = Vector::from([1.0, 2.0]);
+            let result = m.mul_vec(&v);
+            assert_eq!(result.data, vec![0.0, 0.0]);
+        }
+
+        #[test]
+        #[should_panic(expected = "Matrix columns must match vector size")]
+        fn test_matrix_vector_wrong_dimensions() {
+            let m = Matrix::from([[1.0, 2.0]]);
+            let v = Vector::from([1.0, 2.0, 3.0]);
+            m.mul_vec(&v);
+        }
+
+        #[test]
+        fn test_matrix_matrix_multiplication() {
+            let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+            let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+            let result = m1.mul_mat(&m2);
+            assert_eq!(result.data, vec![vec![19.0, 22.0], vec![43.0, 50.0]]);
+        }
+
+        #[test]
+        fn test_matrix_matrix_identity() {
+            let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+            let i = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+            let result = m.mul_mat(&i);
+            assert_eq!(result.data, m.data);
+        }
+
+        #[test]
+        fn test_matrix_matrix_zero() {
+            let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+            let m2 = Matrix::from([[0.0, 0.0], [0.0, 0.0]]);
+            let result = m1.mul_mat(&m2);
+            assert_eq!(result.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
+        }
+
+        #[test]
+        #[should_panic(expected = "First matrix columns must match second matrix rows")]
+        fn test_matrix_matrix_wrong_dimensions() {
+            let m1 = Matrix::from([[1.0, 2.0]]);
+            let m2 = Matrix::from([[1.0], [2.0], [3.0]]);
+            m1.mul_mat(&m2);
         }
     }
 }

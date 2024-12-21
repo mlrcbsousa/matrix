@@ -1,4 +1,5 @@
 #![warn(missing_docs)]
+#![allow(clippy::needless_range_loop)]
 
 //! Linear algebra library implementing basic vector and matrix operations.
 //!
