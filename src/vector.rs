@@ -321,6 +321,50 @@ pub fn linear_combination<K: Scalar>(u: &[Vector<K>], coefs: &[K]) -> Vector<K> 
     Vector::new(result)
 }
 
+/// Computes the cosine of the angle between two vectors.
+///
+/// The cosine is calculated using the formula:
+/// cos(θ) = (u·v) / (∥u∥∥v∥)
+/// where:
+/// - u·v is the dot product
+/// - ∥u∥ is the Euclidean norm (2-norm)
+///
+/// # Complexity
+/// - Time: O(n) where n is the vector length - one pass for dot product and two for norms
+/// - Space: O(1) - only stores temporary calculations
+///
+/// # Arguments
+/// * `u` - First vector
+/// * `v` - Second vector
+///
+/// # Panics
+/// - If vectors have different sizes
+/// - If either vector is zero (undefined angle)
+///
+/// # Example
+/// ```
+/// use matrix::{Vector, angle_cos};
+///
+/// let v1 = Vector::from([1.0, 0.0]);
+/// let v2 = Vector::from([0.0, 1.0]);
+/// let cos = angle_cos(&v1, &v2); // Returns 0.0 (90 degrees)
+/// ```
+pub fn angle_cos<K: Scalar>(u: &Vector<K>, v: &Vector<K>) -> f32 {
+    if u.size() != v.size() {
+        panic!("Vectors must have same size");
+    }
+
+    let dot = u.dot(v);
+    let norm_u = u.norm();
+    let norm_v = v.norm();
+
+    if norm_u == f32::zero() || norm_v == f32::zero() {
+        panic!("Zero vectors have undefined angle");
+    }
+
+    Into::<f32>::into(dot) / (norm_u * norm_v)
+}
+
 // Implementation for initializing a Vector with an array
 impl<K: Scalar, const SIZE: usize> From<[K; SIZE]> for Vector<K> {
     fn from(data: [K; SIZE]) -> Self {
@@ -626,6 +670,54 @@ mod tests {
 
             assert!(norm_inf <= norm_2);
             assert!(norm_2 <= norm_1);
+        }
+    }
+
+    mod cosine_tests {
+        use super::*;
+
+        #[test]
+        fn test_cosine_parallel() {
+            let v1 = Vector::from([2.0, 0.0]);
+            let v2 = Vector::from([4.0, 0.0]);
+            assert!((angle_cos(&v1, &v2) - 1.0).abs() < f32::EPSILON);
+        }
+
+        #[test]
+        fn test_cosine_perpendicular() {
+            let v1 = Vector::from([1.0, 0.0]);
+            let v2 = Vector::from([0.0, 1.0]);
+            assert!(angle_cos(&v1, &v2).abs() < f32::EPSILON);
+        }
+
+        #[test]
+        fn test_cosine_opposite() {
+            let v1 = Vector::from([1.0, 0.0]);
+            let v2 = Vector::from([-1.0, 0.0]);
+            assert!((angle_cos(&v1, &v2) - (-1.0)).abs() < f32::EPSILON);
+        }
+
+        #[test]
+        fn test_cosine_45_degrees() {
+            let v1 = Vector::from([1.0, 0.0]);
+            let v2 = Vector::from([1.0, 1.0]);
+            assert!((angle_cos(&v1, &v2) - 0.7071067812).abs() < 1e-7);
+        }
+
+        #[test]
+        #[should_panic(expected = "Zero vectors have undefined angle")]
+        fn test_cosine_zero_vector() {
+            let v1 = Vector::from([0.0, 0.0]);
+            let v2 = Vector::from([1.0, 0.0]);
+            angle_cos(&v1, &v2);
+        }
+
+        #[test]
+        #[should_panic(expected = "Vectors must have same size")]
+        fn test_cosine_different_sizes() {
+            let v1 = Vector::from([1.0, 0.0]);
+            let v2 = Vector::from([1.0]);
+            angle_cos(&v1, &v2);
         }
     }
 }
