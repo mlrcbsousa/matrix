@@ -389,20 +389,26 @@ fn exercise_06() {
 
     println!("\nRight hand rule with basis vectors:");
     println!("i × j = k:");
-    println!("i:"); i.print();
-    println!("j:"); j.print();
+    println!("i:");
+    i.print();
+    println!("j:");
+    j.print();
     println!("Result:");
     cross_product(&i, &j).print();
 
     println!("\nj × k = i:");
-    println!("j:"); j.print();
-    println!("k:"); k.print();
+    println!("j:");
+    j.print();
+    println!("k:");
+    k.print();
     println!("Result:");
     cross_product(&j, &k).print();
 
     println!("\nk × i = j:");
-    println!("k:"); k.print();
-    println!("i:"); i.print();
+    println!("k:");
+    k.print();
+    println!("i:");
+    i.print();
     println!("Result:");
     cross_product(&k, &i).print();
 
@@ -411,8 +417,10 @@ fn exercise_06() {
     let v = Vector::from([5.0, 6.0, 7.0]);
 
     println!("\nAnticommutative property (u × v = -(v × u)):");
-    println!("u:"); u.print();
-    println!("v:"); v.print();
+    println!("u:");
+    u.print();
+    println!("v:");
+    v.print();
     println!("u × v:");
     cross_product(&u, &v).print();
     println!("v × u:");
@@ -422,8 +430,10 @@ fn exercise_06() {
     let u = Vector::from([4.0, 2.0, -3.0]);
     let v = Vector::from([-2.0, -5.0, 16.0]);
     println!("\nPractical example:");
-    println!("u:"); u.print();
-    println!("v:"); v.print();
+    println!("u:");
+    u.print();
+    println!("v:");
+    v.print();
     println!("u × v:");
     cross_product(&u, &v).print();
 }
