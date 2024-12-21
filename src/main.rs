@@ -438,6 +438,56 @@ fn exercise_06() {
     cross_product(&u, &v).print();
 }
 
+fn exercise_07() {
+    println!();
+    println!("Exercise 07 - Matrix Multiplication");
+    println!("-----------------------------------");
+
+    // Matrix-Vector multiplication
+    println!("\nMatrix-Vector Multiplication:");
+    let m = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+    let v = Vector::from([4.0, 2.0]);
+
+    println!("Matrix (identity):");
+    m.print();
+    println!("Vector:");
+    v.print();
+    println!("Result (Mv):");
+    m.mul_vec(&v).print();
+
+    // Scaling matrix example
+    println!("\nScaling matrix example:");
+    let scale = Matrix::from([[2.0, 0.0], [0.0, 2.0]]);
+    println!("Matrix (2x scaling):");
+    scale.print();
+    println!("Vector:");
+    v.print();
+    println!("Result (scales vector by 2):");
+    scale.mul_vec(&v).print();
+
+    // Matrix-Matrix multiplication
+    println!("\nMatrix-Matrix Multiplication:");
+    let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    let m2 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
+
+    println!("Matrix 1:");
+    m1.print();
+    println!("Matrix 2:");
+    m2.print();
+    println!("Result (M1 × M2):");
+    m1.mul_mat(&m2).print();
+
+    // Special case: Identity
+    println!("\nMultiplication with identity:");
+    let identity = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+    println!("Matrix:");
+    m1.print();
+    println!("Identity matrix:");
+    identity.print();
+    println!("Result (M × I):");
+    m1.mul_mat(&identity).print();
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -457,7 +507,7 @@ fn main() {
         Some("ex04") => exercise_04(),
         Some("ex05") => exercise_05(),
         Some("ex06") => exercise_06(),
-        // Some("ex07") => exercise_07(),
+        Some("ex07") => exercise_07(),
         // Some("ex08") => exercise_08(),
         // Some("ex09") => exercise_09(),
         // Some("ex10") => exercise_10(),
@@ -479,7 +529,7 @@ fn main() {
             exercise_04();
             exercise_05();
             exercise_06();
-            // exercise_07();
+            exercise_07();
             // exercise_08();
             // exercise_09();
             // exercise_10();
