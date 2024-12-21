@@ -305,15 +305,15 @@ fn exercise_04() {
 
     println!("\nVector 1:");
     v1.print();
-    println!("Manhattan norm (1-norm):   {}", v1.norm_1());    // 5.0
-    println!("Euclidean norm (2-norm):   {}", v1.norm());      // 3.0
-    println!("Supremum norm (inf-norm):  {}", v1.norm_inf());  // 2.0
+    println!("Manhattan norm (1-norm):   {}", v1.norm_1()); // 5.0
+    println!("Euclidean norm (2-norm):   {}", v1.norm()); // 3.0
+    println!("Supremum norm (inf-norm):  {}", v1.norm_inf()); // 2.0
 
     println!("\nVector 2:");
     v2.print();
-    println!("Manhattan norm (1-norm):   {}", v2.norm_1());    // 7.0
-    println!("Euclidean norm (2-norm):   {}", v2.norm());      // 5.0
-    println!("Supremum norm (inf-norm):  {}", v2.norm_inf());  // 4.0
+    println!("Manhattan norm (1-norm):   {}", v2.norm_1()); // 7.0
+    println!("Euclidean norm (2-norm):   {}", v2.norm()); // 5.0
+    println!("Supremum norm (inf-norm):  {}", v2.norm_inf()); // 4.0
 
     // Demonstrate relationships between norms
     println!("\nRelationships between norms:");
@@ -322,8 +322,12 @@ fn exercise_04() {
     let v3 = Vector::from([3.0, -4.0]);
     println!("\nVector:");
     v3.print();
-    println!("∥v∥∞ = {} ≤ ∥v∥₂ = {} ≤ ∥v∥₁ = {}",
-        v3.norm_inf(), v3.norm(), v3.norm_1());
+    println!(
+        "∥v∥∞ = {} ≤ ∥v∥₂ = {} ≤ ∥v∥₁ = {}",
+        v3.norm_inf(),
+        v3.norm(),
+        v3.norm_1()
+    );
 }
 
 fn main() {
