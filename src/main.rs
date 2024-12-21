@@ -1,4 +1,4 @@
-use matrix::{lerp, linear_combination, Matrix, Scalar, Vector};
+use matrix::{Matrix, Scalar, Vector, lerp, linear_combination, angle_cos};
 use std::env;
 
 fn print_usage() {
@@ -330,6 +330,53 @@ fn exercise_04() {
     );
 }
 
+fn exercise_05() {
+    println!();
+    println!("Exercise 05 - Cosine");
+    println!("--------------------");
+
+    // Basic vectors
+    let v1 = Vector::from([1.0, 0.0]);
+    let v2 = Vector::from([0.0, 1.0]);
+
+    println!("\nPerpendicular vectors (90°):");
+    println!("v1:");
+    v1.print();
+    println!("v2:");
+    v2.print();
+    println!("cos(angle) = {}", angle_cos(&v1, &v2)); // 0.0
+
+    // Parallel vectors
+    let v3 = Vector::from([2.0, 0.0]);
+    let v4 = Vector::from([4.0, 0.0]);
+    println!("\nParallel vectors (0°):");
+    println!("v3:");
+    v3.print();
+    println!("v4:");
+    v4.print();
+    println!("cos(angle) = {}", angle_cos(&v3, &v4)); // 1.0
+
+    // Opposite vectors
+    let v5 = Vector::from([1.0, 0.0]);
+    let v6 = Vector::from([-1.0, 0.0]);
+    println!("\nOpposite vectors (180°):");
+    println!("v5:");
+    v5.print();
+    println!("v6:");
+    v6.print();
+    println!("cos(angle) = {}", angle_cos(&v5, &v6)); // -1.0
+
+    // 45 degree angle
+    let v7 = Vector::from([1.0, 0.0]);
+    let v8 = Vector::from([1.0, 1.0]);
+    println!("\n45° angle vectors:");
+    println!("v7:");
+    v7.print();
+    println!("v8:");
+    v8.print();
+    println!("cos(angle) = {}", angle_cos(&v7, &v8)); // ~0.707
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -347,7 +394,7 @@ fn main() {
         Some("ex02") => exercise_02(),
         Some("ex03") => exercise_03(),
         Some("ex04") => exercise_04(),
-        // Some("ex05") => exercise_05(),
+        Some("ex05") => exercise_05(),
         // Some("ex06") => exercise_06(),
         // Some("ex07") => exercise_07(),
         // Some("ex08") => exercise_08(),
@@ -369,7 +416,7 @@ fn main() {
             exercise_02();
             exercise_03();
             exercise_04();
-            // exercise_05();
+            exercise_05();
             // exercise_06();
             // exercise_07();
             // exercise_08();
