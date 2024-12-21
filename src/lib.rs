@@ -13,4 +13,4 @@ mod vector;
 pub use lerp::lerp;
 pub use matrix::Matrix;
 pub use scalar::Scalar;
-pub use vector::{angle_cos, linear_combination, Vector};
+pub use vector::{angle_cos, cross_product, linear_combination, Vector};

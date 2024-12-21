@@ -1,4 +1,4 @@
-use matrix::{angle_cos, lerp, linear_combination, Matrix, Scalar, Vector};
+use matrix::{angle_cos, cross_product, lerp, linear_combination, Matrix, Scalar, Vector};
 use std::env;
 
 fn print_usage() {
@@ -377,6 +377,67 @@ fn exercise_05() {
     println!("cos(angle) = {}", angle_cos(&v7, &v8)); // ~0.707
 }
 
+fn exercise_06() {
+    println!();
+    println!("Exercise 06 - Cross Product");
+    println!("---------------------------");
+
+    // Standard basis vectors
+    let i = Vector::from([1.0, 0.0, 0.0]);
+    let j = Vector::from([0.0, 1.0, 0.0]);
+    let k = Vector::from([0.0, 0.0, 1.0]);
+
+    println!("\nRight hand rule with basis vectors:");
+    println!("i × j = k:");
+    println!("i:");
+    i.print();
+    println!("j:");
+    j.print();
+    println!("Result:");
+    cross_product(&i, &j).print();
+
+    println!("\nj × k = i:");
+    println!("j:");
+    j.print();
+    println!("k:");
+    k.print();
+    println!("Result:");
+    cross_product(&j, &k).print();
+
+    println!("\nk × i = j:");
+    println!("k:");
+    k.print();
+    println!("i:");
+    i.print();
+    println!("Result:");
+    cross_product(&k, &i).print();
+
+    // Anticommutative property
+    let u = Vector::from([2.0, 3.0, 4.0]);
+    let v = Vector::from([5.0, 6.0, 7.0]);
+
+    println!("\nAnticommutative property (u × v = -(v × u)):");
+    println!("u:");
+    u.print();
+    println!("v:");
+    v.print();
+    println!("u × v:");
+    cross_product(&u, &v).print();
+    println!("v × u:");
+    cross_product(&v, &u).print();
+
+    // Practical example
+    let u = Vector::from([4.0, 2.0, -3.0]);
+    let v = Vector::from([-2.0, -5.0, 16.0]);
+    println!("\nPractical example:");
+    println!("u:");
+    u.print();
+    println!("v:");
+    v.print();
+    println!("u × v:");
+    cross_product(&u, &v).print();
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -395,7 +456,7 @@ fn main() {
         Some("ex03") => exercise_03(),
         Some("ex04") => exercise_04(),
         Some("ex05") => exercise_05(),
-        // Some("ex06") => exercise_06(),
+        Some("ex06") => exercise_06(),
         // Some("ex07") => exercise_07(),
         // Some("ex08") => exercise_08(),
         // Some("ex09") => exercise_09(),
@@ -417,7 +478,7 @@ fn main() {
             exercise_03();
             exercise_04();
             exercise_05();
-            // exercise_06();
+            exercise_06();
             // exercise_07();
             // exercise_08();
             // exercise_09();
