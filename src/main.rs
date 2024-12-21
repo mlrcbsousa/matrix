@@ -1,4 +1,4 @@
-use matrix::{Matrix, Scalar, Vector, lerp, linear_combination, angle_cos};
+use matrix::{angle_cos, lerp, linear_combination, Matrix, Scalar, Vector};
 use std::env;
 
 fn print_usage() {
