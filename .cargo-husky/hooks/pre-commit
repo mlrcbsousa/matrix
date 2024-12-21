@@ -6,7 +6,7 @@ echo "Running tests..."
 cargo test || exit 1
 
 echo "Running formatting..."
-cargo fmt || true
+cargo fmt || exit 1
 
 echo "Running clippy..."
 cargo clippy -- -D warnings || exit 1
