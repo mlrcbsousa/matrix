@@ -656,11 +656,7 @@ fn exercise_12() {
     println!("----------------------------");
 
     // Identity matrix example
-    let m = Matrix::from([
-        [1.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0],
-        [0.0, 0.0, 1.0],
-    ]);
+    let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
     println!("\nIdentity matrix:");
     m.print();
     println!("Inverse (should be identity):");
@@ -670,10 +666,7 @@ fn exercise_12() {
     }
 
     // 2x2 scaling matrix
-    let m = Matrix::from([
-        [2.0, 0.0],
-        [0.0, 2.0],
-    ]);
+    let m = Matrix::from([[2.0, 0.0], [0.0, 2.0]]);
     println!("\n2x2 scaling matrix:");
     m.print();
     println!("Inverse (should be 1/2 scaling):");
@@ -683,10 +676,7 @@ fn exercise_12() {
     }
 
     // General 2x2 matrix
-    let m = Matrix::from([
-        [1.0, 2.0],
-        [3.0, 4.0],
-    ]);
+    let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
     println!("\nGeneral 2x2 matrix:");
     m.print();
     println!("Inverse:");
@@ -696,15 +686,12 @@ fn exercise_12() {
             // Verify inverse by multiplication
             println!("\nVerification A * A⁻¹ (should be identity):");
             m.mul_mat(&inv).print();
-        },
+        }
         Err(e) => println!("Error: {:?}", e),
     }
 
     // Singular matrix (not invertible)
-    let m = Matrix::from([
-        [1.0, 2.0],
-        [2.0, 4.0],
-    ]);
+    let m = Matrix::from([[1.0, 2.0], [2.0, 4.0]]);
     println!("\nSingular matrix (linearly dependent rows):");
     m.print();
     println!("Inverse attempt:");
@@ -714,10 +701,7 @@ fn exercise_12() {
     }
 
     // Non-square matrix
-    let m = Matrix::from([
-        [1.0, 2.0, 3.0],
-        [4.0, 5.0, 6.0],
-    ]);
+    let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
     println!("\nNon-square matrix:");
     m.print();
     println!("Inverse attempt:");
@@ -727,10 +711,7 @@ fn exercise_12() {
     }
 
     // Example from subject
-    let m = Matrix::from([
-        [-7.0, 5.0],
-        [4.0,  6.0],
-    ]);
+    let m = Matrix::from([[-7.0, 5.0], [4.0, 6.0]]);
     println!("\nExample from subject:");
     m.print();
     println!("Inverse:");
@@ -739,7 +720,7 @@ fn exercise_12() {
             inv.print();
             println!("\nVerification A * A⁻¹ (should be identity):");
             m.mul_mat(&inv).print();
-        },
+        }
         Err(e) => println!("Error: {:?}", e),
     }
 }

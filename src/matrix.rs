@@ -718,7 +718,11 @@ impl<K: Scalar> Matrix<K> {
                 let minor_det = self.get_minor(i, j).determinant();
 
                 // Calculate cofactor: (-1)^(i+j) * det(minor)
-                let cofactor = if (i + j) % 2 == 0 { minor_det } else { -minor_det };
+                let cofactor = if (i + j) % 2 == 0 {
+                    minor_det
+                } else {
+                    -minor_det
+                };
 
                 // Transpose while building (hence j,i instead of i,j)
                 // and divide by determinant
@@ -1314,68 +1318,51 @@ mod tests {
 
         #[test]
         fn test_inverse_identity() {
-            let m = Matrix::from([
-                [1.0, 0.0],
-                [0.0, 1.0]
-            ]);
+            let m = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
             let inv = m.inverse().unwrap();
             assert_eq!(inv.data, m.data);
         }
 
         #[test]
         fn test_inverse_2x2() {
-            let m = Matrix::from([
-                [4.0, 7.0],
-                [2.0, 6.0]
-            ]);
+            let m = Matrix::from([[4.0, 7.0], [2.0, 6.0]]);
             let inv = m.inverse().unwrap();
-            let expected = Matrix::from([
-                [0.6, -0.7],
-                [-0.2, 0.4]
-            ]);
+            let expected = Matrix::from([[0.6, -0.7], [-0.2, 0.4]]);
 
             for i in 0..2 {
                 for j in 0..2 {
-                    assert!((inv.data[i][j] - expected.data[i][j]).abs() < Matrix::<f32>::TOLERANCE);
+                    assert!(
+                        (inv.data[i][j] - expected.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                    );
                 }
             }
         }
 
         #[test]
         fn test_inverse_singular() {
-            let m = Matrix::from([
-                [1.0, 2.0],
-                [2.0, 4.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0], [2.0, 4.0]]);
             assert_eq!(m.inverse(), Err(MatrixError::Singular));
         }
 
         #[test]
         fn test_inverse_not_square() {
-            let m = Matrix::from([
-                [1.0, 2.0, 3.0],
-                [4.0, 5.0, 6.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             assert_eq!(m.inverse(), Err(MatrixError::NotSquare));
         }
 
         #[test]
         fn test_inverse_multiplication() {
-            let a = Matrix::from([
-                [4.0, 3.0],
-                [3.0, 2.0]
-            ]);
+            let a = Matrix::from([[4.0, 3.0], [3.0, 2.0]]);
             let a_inv = a.inverse().unwrap();
             let prod = a.mul_mat(&a_inv);
 
-            let identity = Matrix::from([
-                [1.0, 0.0],
-                [0.0, 1.0]
-            ]);
+            let identity = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
 
             for i in 0..2 {
                 for j in 0..2 {
-                    assert!((prod.data[i][j] - identity.data[i][j]).abs() < Matrix::<f32>::TOLERANCE);
+                    assert!(
+                        (prod.data[i][j] - identity.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                    );
                 }
             }
         }
