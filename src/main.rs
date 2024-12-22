@@ -524,35 +524,86 @@ fn exercise_09() {
     println!("-----------------------");
 
     // Square matrix example
-    let m1 = Matrix::from([
-        [1.0, 2.0],
-        [3.0, 4.0]
-    ]);
+    let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
     println!("\nOriginal square matrix:");
     m1.print();
     println!("\nTransposed:");
     m1.transpose().print();
 
     // Rectangular matrix example
-    let m2 = Matrix::from([
-        [1.0, 2.0, 3.0],
-        [4.0, 5.0, 6.0]
-    ]);
+    let m2 = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
     println!("\nOriginal rectangular matrix:");
     m2.print();
     println!("\nTransposed:");
     m2.transpose().print();
 
     // Identity matrix example
-    let identity = Matrix::from([
-        [1.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0],
-        [0.0, 0.0, 1.0]
-    ]);
+    let identity = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
     println!("\nIdentity matrix:");
     identity.print();
     println!("\nTransposed (should be identical):");
     identity.transpose().print();
+}
+
+fn exercise_10() {
+    println!();
+    println!("Exercise 10 - Row Echelon Form");
+    println!("------------------------------");
+
+    // Example 1: Simple 2x2 matrix that reduces to identity
+    let m1 = Matrix::from([
+        [2.0, 4.0],
+        [1.0, 1.0],
+    ]);
+    println!("\nOriginal 2x2 matrix:");
+    m1.print();
+    println!("\nReduced Row Echelon Form:");
+    m1.row_echelon().print();
+
+    // Example 2: Matrix with linear dependence
+    let m2 = Matrix::from([
+        [1.0, 2.0],
+        [2.0, 4.0],  // Multiple of first row
+    ]);
+    println!("\nMatrix with dependent rows:");
+    m2.print();
+    println!("\nReduced Row Echelon Form (second row zeros out):");
+    m2.row_echelon().print();
+
+    // Example 3: The 3x5 matrix from subject example
+    let m3 = Matrix::from([
+        [8.0, 5.0, -2.0, 4.0, 28.0],
+        [4.0, 2.5, 20.0, 4.0, -4.0],
+        [8.0, 5.0, 1.0, 4.0, 17.0]
+    ]);
+    println!("\nLarger 3x5 matrix:");
+    m3.print();
+    println!("\nReduced Row Echelon Form:");
+    m3.row_echelon().print();
+
+    // Example 4: Matrix requiring partial pivoting
+    let m4 = Matrix::from([
+        [0.001, 1.0],
+        [1.0, 1.0],    // Better pivot than first row
+    ]);
+    println!("\nMatrix requiring pivoting (small leading element):");
+    m4.print();
+    println!("\nReduced Row Echelon Form (rows swapped first):");
+    m4.row_echelon().print();
+
+    // Example 5: System of equations
+    println!("\nSystem of equations example:");
+    println!("2x + y = 4");
+    println!("x + y = 3");
+    let m5 = Matrix::from([
+        [2.0, 1.0, 4.0],  // Augmented matrix [A|b]
+        [1.0, 1.0, 3.0],
+    ]);
+    println!("\nAugmented matrix:");
+    m5.print();
+    println!("\nSolution (in RREF):");
+    m5.row_echelon().print();
+    println!("Therefore: x = 1, y = 2");
 }
 
 fn main() {
@@ -577,7 +628,7 @@ fn main() {
         Some("ex07") => exercise_07(),
         Some("ex08") => exercise_08(),
         Some("ex09") => exercise_09(),
-        // Some("ex10") => exercise_10(),
+        Some("ex10") => exercise_10(),
         // Some("ex11") => exercise_11(),
         // Some("ex12") => exercise_12(),
         // Some("ex13") => exercise_13(),
@@ -599,7 +650,7 @@ fn main() {
             exercise_07();
             exercise_08();
             exercise_09();
-            // exercise_10();
+            exercise_10();
             // exercise_11();
             // exercise_12();
             // exercise_13();

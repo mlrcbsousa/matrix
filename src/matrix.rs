@@ -138,6 +138,22 @@ impl<K: Scalar> Matrix<K> {
         self.rows() == self.cols()
     }
 
+    /// Returns true if the matrix is empty (zero rows or columns).
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let empty = Matrix::<f32>::new(vec![]);
+    /// let non_empty = Matrix::from([[1.0]]);
+    ///
+    /// empty.is_empty();       // true
+    /// non_empty.is_empty();   // false
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.rows() == 0 || self.cols() == 0
+    }
+
     /// Adds another matrix to this one in place.
     /// Both matrices must have the same dimensions.
     ///
@@ -399,6 +415,123 @@ impl<K: Scalar> Matrix<K> {
         }
 
         Matrix::new(result)
+    }
+
+    /// Computes the Reduced Row Echelon Form (RREF) of this matrix using Gaussian elimination.
+    ///
+    /// Algorithm steps:
+    /// 1. For each column (potential pivot):
+    ///    a. Find row with largest absolute value in current column (partial pivoting)
+    ///    b. If largest value < TOLERANCE, skip column (no pivot here)
+    ///    c. Swap row with current pivot row
+    ///    d. Scale pivot row to make pivot = 1
+    ///    e. Eliminate entries in pivot column in all other rows
+    /// 2. Clean up values smaller than TOLERANCE to exactly zero
+    ///
+    /// Uses partial pivoting and numerical tolerance for stability.
+    ///
+    /// # Complexity
+    /// - Time: O(n³) where n is the largest dimension
+    /// - Space: O(n²) for the result matrix
+    ///
+    /// # Examples
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let m = Matrix::from([
+    ///     [2.0, 4.0],
+    ///     [1.0, 2.0]
+    /// ]);
+    /// let rref = m.row_echelon();
+    /// // Result is:
+    /// // [1.0, 2.0]
+    /// // [0.0, 0.0]
+    /// ```
+    pub fn row_echelon(&self) -> Matrix<K> {
+        let rows = self.rows();
+        let cols = self.cols();
+
+        if self.is_empty() {
+            panic!("Cannot compute RREF of an empty matrix.");
+        }
+
+        for row in &self.data {
+            if row.len() != cols {
+                panic!("Matrix rows must have the same number of columns.");
+            }
+        }
+
+        // Numerical tolerance for considering values effectively zero
+        // We could use f32::EPSILON (≈1.19e-7) which represents the smallest positive
+        // number where 1.0 + x ≠ 1.0 in f32. However, for RREF we chose a smaller
+        // tolerance (1e-10) because:
+        // 1. In RREF, we want to be very certain a value is truly zero before treating
+        //    it as a pivot or declaring linear dependence
+        // 2. When solving systems of equations, false non-zeros can lead to incorrect
+        //    rank calculations and thus wrong solutions
+        // 3. The added precision helps distinguish nearly-dependent rows that are
+        //    actually independent
+        //
+        // Note: If numerical stability becomes an issue (e.g., with very large matrices
+        // or ill-conditioned systems), increasing this to f32::EPSILON might be appropriate
+        const TOLERANCE: f32 = 1e-10;
+
+        let mut result = self.clone();
+        let mut pivot_row = 0;
+
+        // Forward elimination to RREF
+        for pivot_col in 0..cols {
+            // Find row with largest absolute value in current column (partial pivoting)
+            let mut max_row = pivot_row;
+            let mut max_val = f32::zero();
+            for r in pivot_row..rows {
+                let val: f32 = result.data[r][pivot_col].into();
+                if val.abs() > max_val {
+                    max_val = val.abs();
+                    max_row = r;
+                }
+            }
+
+            // Skip column if no valid pivot found
+            if max_val < TOLERANCE {
+                continue;
+            }
+
+            // Swap max row to pivot position
+            if max_row != pivot_row {
+                result.data.swap(max_row, pivot_row);
+            }
+
+            // Scale pivot row to get leading 1
+            let pivot = result.data[pivot_row][pivot_col];
+            for c in pivot_col..cols {
+                result.data[pivot_row][c] /= pivot;
+            }
+
+            // Eliminate non-zero entries in pivot column
+            for r in 0..rows {
+                if r != pivot_row {
+                    let factor = result.data[r][pivot_col];
+                    if Into::<f32>::into(factor).abs() > TOLERANCE {
+                        for c in pivot_col..cols {
+                            result.data[r][c] = result.data[r][c] - factor * result.data[pivot_row][c];
+
+                            // Clean up near-zero values
+                            if Into::<f32>::into(result.data[r][c]).abs() < TOLERANCE {
+                                result.data[r][c] = K::zero();
+                            }
+                        }
+                    }
+                }
+            }
+
+            pivot_row += 1;
+            if pivot_row == rows {
+                break;
+            }
+        }
+
+        result
     }
 }
 
@@ -728,46 +861,194 @@ mod tests {
 
         #[test]
         fn test_transpose_square() {
-            let m = Matrix::from([
-                [1.0, 2.0],
-                [3.0, 4.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
             let m_t = m.transpose();
             assert_eq!(m_t.data, vec![vec![1.0, 3.0], vec![2.0, 4.0]]);
         }
 
         #[test]
         fn test_transpose_rectangular() {
-            let m = Matrix::from([
-                [1.0, 2.0, 3.0],
-                [4.0, 5.0, 6.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             let m_t = m.transpose();
-            assert_eq!(m_t.data, vec![
-                vec![1.0, 4.0],
-                vec![2.0, 5.0],
-                vec![3.0, 6.0]
-            ]);
+            assert_eq!(
+                m_t.data,
+                vec![vec![1.0, 4.0], vec![2.0, 5.0], vec![3.0, 6.0]]
+            );
         }
 
         #[test]
         fn test_transpose_identity() {
-            let m = Matrix::from([
-                [1.0, 0.0],
-                [0.0, 1.0]
-            ]);
+            let m = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
             let m_t = m.transpose();
             assert_eq!(m_t.data, m.data);
         }
 
         #[test]
         fn test_transpose_twice() {
+            let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+            let m_tt = m.transpose().transpose();
+            assert_eq!(m_tt.data, m.data);
+        }
+    }
+
+    mod row_echelon_tests {
+        use super::*;
+
+        #[test]
+        #[should_panic(expected = "Cannot compute RREF of an empty matrix.")]
+        fn test_row_echelon_empty_matrix() {
+            let m: Matrix<f32> = Matrix::new(vec![]);
+            m.row_echelon();
+        }
+
+        #[test]
+        #[should_panic(expected = "Matrix rows must have the same number of columns.")]
+        fn test_row_echelon_inconsistent_rows() {
+            // Create matrix with inconsistent row lengths
+            let mut data = vec![vec![1.0, 2.0, 3.0]];
+            data.push(vec![4.0, 5.0]);  // Second row is shorter
+            let m = Matrix::new(data);
+            m.row_echelon();
+        }
+
+        #[test]
+        fn test_row_echelon_simple() {
             let m = Matrix::from([
                 [1.0, 2.0],
                 [3.0, 4.0]
             ]);
-            let m_tt = m.transpose().transpose();
-            assert_eq!(m_tt.data, m.data);
+            let rref = m.row_echelon();
+
+            // Should reduce to identity matrix
+            let result_data = rref.data;
+            assert!((result_data[0][0] - 1.0).abs() < 1e-6);
+            assert!((result_data[0][1] - 0.0).abs() < 1e-6);
+            assert!((result_data[1][0] - 0.0).abs() < 1e-6);
+            assert!((result_data[1][1] - 1.0).abs() < 1e-6);
+        }
+
+        #[test]
+        fn test_tolerance_significance() {
+            // Create two nearly linearly dependent rows, but mathematically independent
+            // First row is [1, 1]
+            // Second row is [1, 1 + 1e-8] (difference > 1e-10)
+            let m = Matrix::from([
+                [1.0, 1.0],
+                [1.0, 1.0 + 1e-8]
+            ]);
+
+            let rref = m.row_echelon();
+
+            // With our strict tolerance (1e-10), this small difference should be detected
+            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);    // First row normalized
+            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);    // Should be 1, not 0
+            assert!(rref.data[1][0].abs() < 1e-10);  // Should be eliminated
+            assert!(Into::<f32>::into(rref.data[1][1]) - 1e-8 < 1e-10);  // Should have the small difference
+        }
+
+        #[test]
+        fn test_actual_linear_dependence() {
+            let m = Matrix::from([
+                [1.0, 1.0],
+                [1.0, 1.0]            // Exactly same row
+            ]);
+
+            let rref = m.row_echelon();
+
+            // First row should be [1, 1], second row should be zeroed
+            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);
+            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);
+            assert!(rref.data[1][0].abs() < 1e-10);
+            assert!(rref.data[1][1].abs() < 1e-10);
+        }
+
+        #[test]
+        fn test_below_tolerance_zeroing() {
+            let m = Matrix::from([
+                [1.0, 1.0],
+                [1.0, 1.0 + 1e-11]    // Difference smaller than tolerance
+            ]);
+
+            let rref = m.row_echelon();
+
+            // Should treat rows as dependent since difference is below tolerance
+            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);
+            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);
+            assert!(rref.data[1][0].abs() < 1e-10);
+            assert!(rref.data[1][1].abs() < 1e-10);
+        }
+
+        #[test]
+        fn test_row_echelon_subject_example() {
+            let m = Matrix::from([
+                [8.0, 5.0, -2.0, 4.0, 28.0],
+                [4.0, 2.5, 20.0, 4.0, -4.0],
+                [8.0, 5.0, 1.0, 4.0, 17.0]
+            ]);
+            let rref = m.row_echelon();
+
+            // Check first row - [1.0, 0.625, 0.0, 0.0, -12.1666667]
+            assert!((rref.data[0][0] - 1.0).abs() < 1e-6);
+            assert!((rref.data[0][1] - 0.625).abs() < 1e-6);
+            assert!((rref.data[0][2] - 0.0).abs() < 1e-6);
+            assert!((rref.data[0][3] - 0.0).abs() < 1e-6);
+            assert!((rref.data[0][4] - (-12.1666667)).abs() < 1e-6);
+
+            // Check second row - [0.0, 0.0, 1.0, 0.0, -3.6666667]
+            assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
+            assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
+            assert!((rref.data[1][2] - 1.0).abs() < 1e-6);
+            assert!((rref.data[1][3] - 0.0).abs() < 1e-6);
+            assert!((rref.data[1][4] - (-3.6666667)).abs() < 1e-6);
+
+            // Check third row - [0.0, 0.0, 0.0, 1.0, 29.5]
+            assert!((rref.data[2][0] - 0.0).abs() < 1e-6);
+            assert!((rref.data[2][1] - 0.0).abs() < 1e-6);
+            assert!((rref.data[2][2] - 0.0).abs() < 1e-6);
+            assert!((rref.data[2][3] - 1.0).abs() < 1e-6);
+            assert!((rref.data[2][4] - 29.5).abs() < 1e-6);
+        }
+
+        #[test]
+        fn test_row_echelon_zero_matrix() {
+            let m = Matrix::from([
+                [0.0, 0.0],
+                [0.0, 0.0]
+            ]);
+            let rref = m.row_echelon();
+
+            // Zero matrix should remain zero
+            assert_eq!(rref.data, vec![
+                vec![0.0, 0.0],
+                vec![0.0, 0.0]
+            ]);
+        }
+
+        #[test]
+        fn test_row_echelon_identity() {
+            let m = Matrix::from([
+                [1.0, 0.0],
+                [0.0, 1.0]
+            ]);
+            let rref = m.row_echelon();
+
+            // Identity matrix should remain unchanged
+            assert_eq!(rref.data, m.data);
+        }
+
+        #[test]
+        fn test_row_echelon_dependent_rows() {
+            let m = Matrix::from([
+                [1.0, 2.0],
+                [2.0, 4.0]
+            ]);
+            let rref = m.row_echelon();
+
+            // Second row should reduce to zero
+            assert!((rref.data[0][0] - 1.0).abs() < 1e-6);
+            assert!((rref.data[0][1] - 2.0).abs() < 1e-6);
+            assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
+            assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
         }
     }
 }
