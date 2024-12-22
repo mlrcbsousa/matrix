@@ -603,6 +603,53 @@ fn exercise_10() {
     println!("Therefore: x = 1, y = 2");
 }
 
+fn exercise_11() {
+    println!();
+    println!("Exercise 11 - Determinant");
+    println!("------------------------");
+
+    // 1x1 matrix
+    let m = Matrix::from([[2.0]]);
+    println!("\n1x1 Matrix:");
+    m.print();
+    println!("Determinant: {}", m.determinant());
+
+    // 2x2 matrix examples
+    let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+    println!("\n2x2 Matrix:");
+    m.print();
+    println!("Determinant: {}", m.determinant());
+
+    // Singular 2x2 matrix (linearly dependent rows)
+    let m = Matrix::from([[1.0, 2.0], [2.0, 4.0]]);
+    println!("\n2x2 Singular Matrix (det = 0):");
+    m.print();
+    println!("Determinant: {}", m.determinant());
+
+    // 3x3 matrix from subject example
+    let m = Matrix::from([[8.0, 5.0, -2.0], [4.0, 7.0, 20.0], [7.0, 6.0, 1.0]]);
+    println!("\n3x3 Matrix (subject example):");
+    m.print();
+    println!("Determinant: {}", m.determinant());
+
+    // 4x4 matrix from subject example
+    let m = Matrix::from([
+        [8.0, 5.0, -2.0, 4.0],
+        [4.0, 2.5, 20.0, 4.0],
+        [8.0, 5.0, 1.0, 4.0],
+        [28.0, -4.0, 17.0, 1.0],
+    ]);
+    println!("\n4x4 Matrix (subject example):");
+    m.print();
+    println!("Determinant: {}", m.determinant());
+
+    // Identity matrix example
+    let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
+    println!("\nIdentity Matrix:");
+    m.print();
+    println!("Determinant: {} (always 1 for identity)", m.determinant());
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -626,7 +673,7 @@ fn main() {
         Some("ex08") => exercise_08(),
         Some("ex09") => exercise_09(),
         Some("ex10") => exercise_10(),
-        // Some("ex11") => exercise_11(),
+        Some("ex11") => exercise_11(),
         // Some("ex12") => exercise_12(),
         // Some("ex13") => exercise_13(),
         // Some("ex14") => exercise_14(),
@@ -648,7 +695,7 @@ fn main() {
             exercise_08();
             exercise_09();
             exercise_10();
-            // exercise_11();
+            exercise_11();
             // exercise_12();
             // exercise_13();
             // exercise_14();

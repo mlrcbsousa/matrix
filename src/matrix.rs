@@ -534,6 +534,125 @@ impl<K: Scalar> Matrix<K> {
 
         result
     }
+
+    /// Computes the determinant of the matrix.
+    ///
+    /// The determinant is a scalar value that provides information about:
+    /// - Whether the matrix is invertible (det ≠ 0)
+    /// - The scaling factor of linear transformation
+    /// - The orientation/handedness change of transformation
+    ///
+    /// For matrices up to 4x4, uses dimension-specific optimized formulas:
+    /// - 1x1: det = a
+    /// - 2x2: det = ad - bc
+    /// - 3x3: Uses cofactor expansion with 2x2 determinants
+    /// - 4x4: Uses cofactor expansion with 3x3 determinants
+    ///
+    /// # Complexity
+    /// - Time: O(n³) where n is matrix dimension
+    /// - Space: O(n²) for recursive calculations
+    ///
+    /// # Panics
+    /// - If matrix is not square
+    /// - If matrix dimension > 4
+    /// - If matrix has 0 rows (empty)
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    /// let m = Matrix::from([
+    ///     [1.0, 2.0],
+    ///     [3.0, 4.0]
+    /// ]);
+    /// let det = m.determinant(); // Returns -2.0
+    /// ```
+    pub fn determinant(&self) -> K {
+        if !self.is_square() {
+            panic!("Determinant only defined for square matrices");
+        }
+
+        let n = self.rows();
+        match n {
+            0 => panic!("Empty matrix has no determinant"),
+            1 => self.data[0][0],
+            2 => self.det2x2(),
+            3 => self.det3x3(),
+            4 => self.det4x4(),
+            _ => panic!("Determinant implementation limited to 4x4 matrices"),
+        }
+    }
+
+    // Helper function for 2x2 determinant
+    // Formula: |A| = ad - bc for matrix [[a b], [c d]]
+    fn det2x2(&self) -> K {
+        let a = self.data[0][0];
+        let b = self.data[0][1];
+        let c = self.data[1][0];
+        let d = self.data[1][1];
+
+        // Use FMA: ad - bc
+        K::fma(a, d, -(b * c))
+    }
+
+    // Helper function for 3x3 determinant
+    fn det3x3(&self) -> K {
+        let mut det = K::zero();
+
+        // Expand along first row using 2x2 determinants
+        for j in 0..3 {
+            // Get 2x2 minor by removing row 0 and column j
+            let minor = self.get_minor(0, j);
+
+            // Calculate sign: (-1)^(i+j) where i=0
+            let sign = if j % 2 == 0 { K::one() } else { -K::one() };
+
+            // Use det2x2() for minor and add to total
+            det = K::fma(self.data[0][j] * sign, minor.det2x2(), det);
+        }
+
+        det
+    }
+
+    // Helper function for 4x4 determinant
+    fn det4x4(&self) -> K {
+        let mut det = K::zero();
+
+        // Expand along first row using 3x3 determinants
+        for j in 0..4 {
+            // Get 3x3 minor by removing row 0 and column j
+            let minor = self.get_minor(0, j);
+
+            // Calculate sign: (-1)^(i+j) where i=0
+            let sign = if j % 2 == 0 { K::one() } else { -K::one() };
+
+            // Use det3x3() for minor and add to total
+            det = K::fma(self.data[0][j] * sign, minor.det3x3(), det);
+        }
+
+        det
+    }
+
+    // Helper function to compute minor (determinant of submatrix)
+    fn get_minor(&self, row: usize, col: usize) -> Matrix<K> {
+        let n = self.rows();
+        let mut minor_data = Vec::with_capacity(n - 1);
+
+        for i in 0..n {
+            if i == row {
+                continue;
+            }
+            let mut new_row = Vec::with_capacity(n - 1);
+            for j in 0..n {
+                if j == col {
+                    continue;
+                }
+                new_row.push(self.data[i][j]);
+            }
+            minor_data.push(new_row);
+        }
+
+        Matrix::new(minor_data)
+    }
 }
 
 // Implementation for initializing a Matrix with arrays
@@ -1032,6 +1151,86 @@ mod tests {
             assert!((rref.data[0][1] - 2.0).abs() < 1e-6);
             assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
             assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
+        }
+    }
+    mod determinant_tests {
+        use super::*;
+
+        #[test]
+        fn test_det_1x1() {
+            let m = Matrix::from([[2.0]]);
+            assert_eq!(m.determinant(), 2.0);
+        }
+
+        #[test]
+        fn test_det_2x2() {
+            // Test identity matrix
+            let m = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+            assert_eq!(m.determinant(), 1.0);
+
+            // Test known determinant
+            let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
+            assert_eq!(m.determinant(), -2.0);
+
+            // Test singular matrix
+            let m = Matrix::from([[1.0, 2.0], [2.0, 4.0]]);
+            assert_eq!(m.determinant(), 0.0);
+        }
+
+        #[test]
+        fn test_det_3x3() {
+            // Test identity matrix
+            let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
+            assert_eq!(m.determinant(), 1.0);
+
+            // Test example from subject
+            let m = Matrix::from([[8.0, 5.0, -2.0], [4.0, 7.0, 20.0], [7.0, 6.0, 1.0]]);
+            assert_eq!(m.determinant(), -174.0);
+
+            // Test singular matrix
+            let m = Matrix::from([[1.0, 2.0, 3.0], [2.0, 4.0, 6.0], [3.0, 6.0, 9.0]]);
+            assert_eq!(m.determinant(), 0.0);
+        }
+
+        #[test]
+        fn test_det_4x4() {
+            // Test identity matrix
+            let m = Matrix::from([
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]);
+            assert_eq!(m.determinant(), 1.0);
+
+            // Test example from subject
+            let m = Matrix::from([
+                [8.0, 5.0, -2.0, 4.0],
+                [4.0, 2.5, 20.0, 4.0],
+                [8.0, 5.0, 1.0, 4.0],
+                [28.0, -4.0, 17.0, 1.0],
+            ]);
+            assert_eq!(m.determinant(), 1032.0);
+        }
+
+        #[test]
+        #[should_panic(expected = "Determinant only defined for square matrices")]
+        fn test_det_non_square() {
+            let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
+            m.determinant();
+        }
+
+        #[test]
+        #[should_panic(expected = "Determinant implementation limited to 4x4 matrices")]
+        fn test_det_too_large() {
+            let m = Matrix::from([
+                [1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0],
+            ]);
+            m.determinant();
         }
     }
 }
