@@ -606,7 +606,7 @@ fn exercise_10() {
 fn exercise_11() {
     println!();
     println!("Exercise 11 - Determinant");
-    println!("------------------------");
+    println!("-------------------------");
 
     // 1x1 matrix
     let m = Matrix::from([[2.0]]);
@@ -650,6 +650,100 @@ fn exercise_11() {
     println!("Determinant: {} (always 1 for identity)", m.determinant());
 }
 
+fn exercise_12() {
+    println!();
+    println!("Exercise 12 - Matrix Inverse");
+    println!("----------------------------");
+
+    // Identity matrix example
+    let m = Matrix::from([
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+    ]);
+    println!("\nIdentity matrix:");
+    m.print();
+    println!("Inverse (should be identity):");
+    match m.inverse() {
+        Ok(inv) => inv.print(),
+        Err(e) => println!("Error: {:?}", e),
+    }
+
+    // 2x2 scaling matrix
+    let m = Matrix::from([
+        [2.0, 0.0],
+        [0.0, 2.0],
+    ]);
+    println!("\n2x2 scaling matrix:");
+    m.print();
+    println!("Inverse (should be 1/2 scaling):");
+    match m.inverse() {
+        Ok(inv) => inv.print(),
+        Err(e) => println!("Error: {:?}", e),
+    }
+
+    // General 2x2 matrix
+    let m = Matrix::from([
+        [1.0, 2.0],
+        [3.0, 4.0],
+    ]);
+    println!("\nGeneral 2x2 matrix:");
+    m.print();
+    println!("Inverse:");
+    match m.inverse() {
+        Ok(inv) => {
+            inv.print();
+            // Verify inverse by multiplication
+            println!("\nVerification A * A⁻¹ (should be identity):");
+            m.mul_mat(&inv).print();
+        },
+        Err(e) => println!("Error: {:?}", e),
+    }
+
+    // Singular matrix (not invertible)
+    let m = Matrix::from([
+        [1.0, 2.0],
+        [2.0, 4.0],
+    ]);
+    println!("\nSingular matrix (linearly dependent rows):");
+    m.print();
+    println!("Inverse attempt:");
+    match m.inverse() {
+        Ok(inv) => inv.print(),
+        Err(e) => println!("Error: {:?}", e),
+    }
+
+    // Non-square matrix
+    let m = Matrix::from([
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0],
+    ]);
+    println!("\nNon-square matrix:");
+    m.print();
+    println!("Inverse attempt:");
+    match m.inverse() {
+        Ok(inv) => inv.print(),
+        Err(e) => println!("Error: {:?}", e),
+    }
+
+    // Example from subject
+    let m = Matrix::from([
+        [-7.0, 5.0],
+        [4.0,  6.0],
+    ]);
+    println!("\nExample from subject:");
+    m.print();
+    println!("Inverse:");
+    match m.inverse() {
+        Ok(inv) => {
+            inv.print();
+            println!("\nVerification A * A⁻¹ (should be identity):");
+            m.mul_mat(&inv).print();
+        },
+        Err(e) => println!("Error: {:?}", e),
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -674,7 +768,7 @@ fn main() {
         Some("ex09") => exercise_09(),
         Some("ex10") => exercise_10(),
         Some("ex11") => exercise_11(),
-        // Some("ex12") => exercise_12(),
+        Some("ex12") => exercise_12(),
         // Some("ex13") => exercise_13(),
         // Some("ex14") => exercise_14(),
         // Some("ex15") => exercise_15(),
@@ -696,7 +790,7 @@ fn main() {
             exercise_09();
             exercise_10();
             exercise_11();
-            // exercise_12();
+            exercise_12();
             // exercise_13();
             // exercise_14();
             // exercise_15();
