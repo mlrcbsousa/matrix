@@ -50,21 +50,26 @@ pub fn projection(fov: f32, ratio: f32, near: f32, far: f32) -> Matrix<f32> {
     let tan_half_fov = (fov / 2.0).tan();
     let depth = far - near;
 
-    let t = near * tan_half_fov;
-    let b = -t;
-    let r = t * ratio;
-    let l = -r;
+    // Calculate frustum dimensions
+    let t = near * tan_half_fov; // top
+    let b = -t; // bottom
+    let r = t * ratio; // right
+    let l = -r; // left
 
-    // Populate the matrix.
-    let mut data = vec![vec![0.0; 4], vec![0.0; 4], vec![0.0; 4], vec![0.0; 4]];
+    // Build the matrix
+    let mut data = vec![vec![0.0; 4]; 4];
 
-    data[0][0] = 2.0 * near / (r - l); // Scaling x
-    data[1][1] = 2.0 * near / (t - b); // Scaling y
+    // Scale factors
+    data[0][0] = 2.0 * near / (r - l); // X scale
+    data[1][1] = 2.0 * near / (t - b); // Y scale
+
+    // Perspective transformation
     data[2][0] = (r + l) / (r - l); // Horizontal offset
     data[2][1] = (t + b) / (t - b); // Vertical offset
     data[2][2] = -(far + near) / depth; // Depth normalization
-    data[2][3] = -(2.0 * far * near) / depth; // Depth mapping
-    data[3][2] = -1.0; // Perspective division adjustment
+    data[2][3] = -2.0 * far * near / depth; // Depth mapping
+
+    data[3][2] = -1.0; // Perspective division
 
     Matrix::new(data)
 }

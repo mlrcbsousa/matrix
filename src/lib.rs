@@ -6,12 +6,14 @@
 //! This library provides implementations for vector and matrix operations
 //! including addition, multiplication, determinants, and more.
 
+mod complex;
 mod lerp;
 mod matrix;
 mod projection;
 mod scalar;
 mod vector;
 
+pub use complex::Complex;
 pub use lerp::lerp;
 pub use matrix::Matrix;
 pub use projection::projection;

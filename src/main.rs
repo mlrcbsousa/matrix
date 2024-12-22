@@ -1,5 +1,5 @@
 use matrix::{
-    angle_cos, cross_product, lerp, linear_combination, projection, Matrix, Scalar, Vector,
+    angle_cos, cross_product, lerp, linear_combination, projection, Complex, Matrix, Scalar, Vector,
 };
 use std::env;
 
@@ -761,7 +761,7 @@ fn exercise_13() {
 }
 
 fn exercise_14() {
-    println!("\nExercise 14 - Projection Matrix");
+    println!("\nExercise 14 - Bonus: Projection matrix");
     println!("--------------------------------");
 
     let fov = 90.0_f32.to_radians(); // Field of view in radians (~90 degrees)
@@ -779,6 +779,79 @@ fn exercise_14() {
     println!(
         "\nThis matrix can now be used to transform 3D points in camera space to screen space."
     );
+}
+
+fn exercise_15() {
+    println!("\nExercise 15 - Bonus: Complex vector spaces");
+    println!("----------------------------------------\n");
+
+    // Basic Complex Number Operations
+    println!("Complex Number Operations:");
+    let z1 = Complex::new(3.0, 4.0);
+    let z2 = Complex::new(1.0, 2.0);
+    println!("z1 = {}", z1);
+    println!("z2 = {}", z2);
+    println!("z1 + z2 = {}", z1 + z2);
+    println!("z1 * z2 = {}", z1 * z2);
+    println!("|z1| = {}", z1.modulus());
+    println!("arg(z1) = {}", z1.arg());
+
+    // Complex Vector Operations
+    println!("\nComplex Vector Operations:");
+    let v1 = Vector::new(vec![Complex::new(1.0, 0.0), Complex::new(0.0, 1.0)]);
+    let v2 = Vector::new(vec![Complex::new(0.0, 1.0), Complex::new(1.0, 0.0)]);
+    println!("v1 = {}", v1);
+    println!("v2 = {}", v2);
+    println!("v1·v2 = {}", v1.dot(&v2));
+    println!("||v1|| = {}", v1.norm());
+
+    // Linear Combination of Complex Vectors
+    println!("\nLinear Combination:");
+    let vectors = [v1.clone(), v2.clone()];
+    let coefs = [Complex::new(1.0, 1.0), Complex::new(2.0, 0.0)];
+    println!("Coefficients: [{}, {}]", coefs[0], coefs[1]);
+    let result = linear_combination(&vectors, &coefs);
+    println!("Linear combination = {}", result);
+
+    // Complex Matrix Operations
+    println!("\nComplex Matrix Operations:");
+    let m1 = Matrix::new(vec![
+        vec![Complex::new(1.0, 0.0), Complex::new(2.0, 0.0)],
+        vec![Complex::new(3.0, 0.0), Complex::new(4.0, 0.0)],
+    ]);
+    let m2 = Matrix::new(vec![
+        vec![Complex::new(0.0, 1.0), Complex::new(0.0, 2.0)],
+        vec![Complex::new(0.0, 3.0), Complex::new(0.0, 4.0)],
+    ]);
+    println!("Matrix 1:");
+    m1.print();
+    println!("\nMatrix 2:");
+    m2.print();
+    println!("\nMatrix product:");
+    m1.mul_mat(&m2).print();
+
+    // Linear interpolation with Complex numbers
+    println!("\nComplex Linear Interpolation:");
+    let z3 = Complex::new(0.0, 0.0);
+    let z4 = Complex::new(2.0, 2.0);
+    let t = 0.5;
+    println!("Lerp between {} and {} at t={}", z3, z4, t);
+    println!("Result = {}", lerp(z3, z4, t));
+
+    // 3D Vector operations with Complex numbers
+    println!("\n3D Vector Operations:");
+    let v3d1 = Vector::new(vec![
+        Complex::new(1.0, 0.0),
+        Complex::new(0.0, 0.0),
+        Complex::new(0.0, 0.0),
+    ]);
+    let v3d2 = Vector::new(vec![
+        Complex::new(0.0, 0.0),
+        Complex::new(1.0, 0.0),
+        Complex::new(0.0, 0.0),
+    ]);
+    println!("Cross product:");
+    cross_product(&v3d1, &v3d2).print();
 }
 
 fn main() {
@@ -808,7 +881,7 @@ fn main() {
         Some("ex12") => exercise_12(),
         Some("ex13") => exercise_13(),
         Some("ex14") => exercise_14(),
-        // Some("ex15") => exercise_15(),
+        Some("ex15") => exercise_15(),
         Some("--help" | "-h") => print_usage(),
         None => {
             // Run all exercises
@@ -830,7 +903,7 @@ fn main() {
             exercise_12();
             exercise_13();
             exercise_14();
-            // exercise_15();
+            exercise_15();
         }
         Some(arg) => {
             println!("Unknown exercise: {}", arg);
