@@ -22,13 +22,39 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 ///     [3.0, 4.0]
 /// ]);
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<K: Scalar> {
     /// The data of the matrix stored as a vector of vectors.
     pub data: Vec<Vec<K>>,
 }
 
+/// Error type for matrix inverse operations
+#[derive(Debug, PartialEq)]
+pub enum MatrixError {
+    /// Matrix is singular (non-invertible)
+    Singular,
+    /// Matrix is not square
+    NotSquare,
+}
+
 impl<K: Scalar> Matrix<K> {
+    /// Numerical tolerance for considering values effectively zero
+    /// Used across multiple matrix operations (RREF, inverse, etc.)
+    ///
+    /// We could use f32::EPSILON (≈1.19e-7) which represents the smallest positive
+    /// number where 1.0 + x ≠ 1.0 in f32. However, for RREF we chose a smaller
+    /// tolerance (1e-10) because:
+    /// 1. In RREF, we want to be very certain a value is truly zero before treating
+    ///    it as a pivot or declaring linear dependence
+    /// 2. When solving systems of equations, false non-zeros can lead to incorrect
+    ///    rank calculations and thus wrong solutions
+    /// 3. The added precision helps distinguish nearly-dependent rows that are
+    ///    actually independent
+    ///
+    /// Note: If numerical stability becomes an issue (e.g., with very large matrices
+    /// or ill-conditioned systems), increasing this to f32::EPSILON might be appropriate
+    const TOLERANCE: f32 = 1e-10;
+
     /// Creates a `Matrix<K>` from a vector of vectors of Scalar `K` values.
     ///
     /// # Example
@@ -461,21 +487,6 @@ impl<K: Scalar> Matrix<K> {
             }
         }
 
-        // Numerical tolerance for considering values effectively zero
-        // We could use f32::EPSILON (≈1.19e-7) which represents the smallest positive
-        // number where 1.0 + x ≠ 1.0 in f32. However, for RREF we chose a smaller
-        // tolerance (1e-10) because:
-        // 1. In RREF, we want to be very certain a value is truly zero before treating
-        //    it as a pivot or declaring linear dependence
-        // 2. When solving systems of equations, false non-zeros can lead to incorrect
-        //    rank calculations and thus wrong solutions
-        // 3. The added precision helps distinguish nearly-dependent rows that are
-        //    actually independent
-        //
-        // Note: If numerical stability becomes an issue (e.g., with very large matrices
-        // or ill-conditioned systems), increasing this to f32::EPSILON might be appropriate
-        const TOLERANCE: f32 = 1e-10;
-
         let mut result = self.clone();
         let mut pivot_row = 0;
 
@@ -493,7 +504,7 @@ impl<K: Scalar> Matrix<K> {
             }
 
             // Skip column if no valid pivot found
-            if max_val < TOLERANCE {
+            if max_val < Self::TOLERANCE {
                 continue;
             }
 
@@ -512,13 +523,13 @@ impl<K: Scalar> Matrix<K> {
             for r in 0..rows {
                 if r != pivot_row {
                     let factor = result.data[r][pivot_col];
-                    if Into::<f32>::into(factor).abs() > TOLERANCE {
+                    if Into::<f32>::into(factor).abs() > Self::TOLERANCE {
                         for c in pivot_col..cols {
                             result.data[r][c] =
                                 result.data[r][c] - factor * result.data[pivot_row][c];
 
                             // Clean up near-zero values
-                            if Into::<f32>::into(result.data[r][c]).abs() < TOLERANCE {
+                            if Into::<f32>::into(result.data[r][c]).abs() < Self::TOLERANCE {
                                 result.data[r][c] = K::zero();
                             }
                         }
@@ -652,6 +663,74 @@ impl<K: Scalar> Matrix<K> {
         }
 
         Matrix::new(minor_data)
+    }
+
+    /// Computes the inverse of this matrix, if it exists.
+    ///
+    /// The inverse matrix A⁻¹ of a square matrix A is the unique matrix such that:
+    /// AA⁻¹ = A⁻¹A = I
+    /// where I is the identity matrix.
+    ///
+    /// Uses the classical adjugate method:
+    /// 1. Compute determinant
+    /// 2. For each element (i,j), compute cofactor (using minor determinants)
+    /// 3. Transpose the cofactor matrix to get adjugate
+    /// 4. Divide adjugate by determinant
+    ///
+    /// # Complexity
+    /// - Time: O(n³) where n is matrix dimension
+    /// - Space: O(n²) for storing results
+    ///
+    /// # Return Value
+    /// - Ok(Matrix) containing inverse if matrix is invertible
+    /// - Err(MatrixError::Singular) if matrix is not invertible
+    /// - Err(MatrixError::NotSquare) if matrix is not square
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let m = Matrix::from([
+    ///     [4.0, 7.0],
+    ///     [2.0, 6.0]
+    /// ]);
+    /// let inv = m.inverse().unwrap();
+    /// ```
+    pub fn inverse(&self) -> Result<Matrix<K>, MatrixError> {
+        if !self.is_square() {
+            return Err(MatrixError::NotSquare);
+        }
+
+        let n = self.rows();
+        let det = self.determinant();
+
+        // Check if matrix is invertible using tolerance
+        if Into::<f32>::into(det).abs() < Self::TOLERANCE {
+            return Err(MatrixError::Singular);
+        }
+
+        let mut inverse_data = vec![vec![K::zero(); n]; n];
+
+        // Calculate each element of the adjugate matrix, then divide by determinant
+        for i in 0..n {
+            for j in 0..n {
+                // Get minor determinant by excluding row i and column j
+                let minor_det = self.get_minor(i, j).determinant();
+
+                // Calculate cofactor: (-1)^(i+j) * det(minor)
+                let cofactor = if (i + j) % 2 == 0 {
+                    minor_det
+                } else {
+                    -minor_det
+                };
+
+                // Transpose while building (hence j,i instead of i,j)
+                // and divide by determinant
+                inverse_data[j][i] = cofactor / det;
+            }
+        }
+
+        Ok(Matrix::new(inverse_data))
     }
 }
 
@@ -1231,6 +1310,61 @@ mod tests {
                 [0.0, 0.0, 0.0, 0.0, 1.0],
             ]);
             m.determinant();
+        }
+    }
+
+    mod inverse_tests {
+        use super::*;
+
+        #[test]
+        fn test_inverse_identity() {
+            let m = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+            let inv = m.inverse().unwrap();
+            assert_eq!(inv.data, m.data);
+        }
+
+        #[test]
+        fn test_inverse_2x2() {
+            let m = Matrix::from([[4.0, 7.0], [2.0, 6.0]]);
+            let inv = m.inverse().unwrap();
+            let expected = Matrix::from([[0.6, -0.7], [-0.2, 0.4]]);
+
+            for i in 0..2 {
+                for j in 0..2 {
+                    assert!(
+                        (inv.data[i][j] - expected.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                    );
+                }
+            }
+        }
+
+        #[test]
+        fn test_inverse_singular() {
+            let m = Matrix::from([[1.0, 2.0], [2.0, 4.0]]);
+            assert_eq!(m.inverse(), Err(MatrixError::Singular));
+        }
+
+        #[test]
+        fn test_inverse_not_square() {
+            let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
+            assert_eq!(m.inverse(), Err(MatrixError::NotSquare));
+        }
+
+        #[test]
+        fn test_inverse_multiplication() {
+            let a = Matrix::from([[4.0, 3.0], [3.0, 2.0]]);
+            let a_inv = a.inverse().unwrap();
+            let prod = a.mul_mat(&a_inv);
+
+            let identity = Matrix::from([[1.0, 0.0], [0.0, 1.0]]);
+
+            for i in 0..2 {
+                for j in 0..2 {
+                    assert!(
+                        (prod.data[i][j] - identity.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                    );
+                }
+            }
         }
     }
 }
