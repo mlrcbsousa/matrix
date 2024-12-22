@@ -615,29 +615,19 @@ fn exercise_11() {
     println!("Determinant: {}", m.determinant());
 
     // 2x2 matrix examples
-    let m = Matrix::from([
-        [1.0, 2.0],
-        [3.0, 4.0]
-    ]);
+    let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
     println!("\n2x2 Matrix:");
     m.print();
     println!("Determinant: {}", m.determinant());
 
     // Singular 2x2 matrix (linearly dependent rows)
-    let m = Matrix::from([
-        [1.0, 2.0],
-        [2.0, 4.0]
-    ]);
+    let m = Matrix::from([[1.0, 2.0], [2.0, 4.0]]);
     println!("\n2x2 Singular Matrix (det = 0):");
     m.print();
     println!("Determinant: {}", m.determinant());
 
     // 3x3 matrix from subject example
-    let m = Matrix::from([
-        [8.0, 5.0, -2.0],
-        [4.0, 7.0, 20.0],
-        [7.0, 6.0, 1.0]
-    ]);
+    let m = Matrix::from([[8.0, 5.0, -2.0], [4.0, 7.0, 20.0], [7.0, 6.0, 1.0]]);
     println!("\n3x3 Matrix (subject example):");
     m.print();
     println!("Determinant: {}", m.determinant());
@@ -647,18 +637,14 @@ fn exercise_11() {
         [8.0, 5.0, -2.0, 4.0],
         [4.0, 2.5, 20.0, 4.0],
         [8.0, 5.0, 1.0, 4.0],
-        [28.0, -4.0, 17.0, 1.0]
+        [28.0, -4.0, 17.0, 1.0],
     ]);
     println!("\n4x4 Matrix (subject example):");
     m.print();
     println!("Determinant: {}", m.determinant());
 
     // Identity matrix example
-    let m = Matrix::from([
-        [1.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0],
-        [0.0, 0.0, 1.0]
-    ]);
+    let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
     println!("\nIdentity Matrix:");
     m.print();
     println!("Determinant: {} (always 1 for identity)", m.determinant());

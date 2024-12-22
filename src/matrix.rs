@@ -635,13 +635,17 @@ impl<K: Scalar> Matrix<K> {
     // Helper function to compute minor (determinant of submatrix)
     fn get_minor(&self, row: usize, col: usize) -> Matrix<K> {
         let n = self.rows();
-        let mut minor_data = Vec::with_capacity(n-1);
+        let mut minor_data = Vec::with_capacity(n - 1);
 
         for i in 0..n {
-            if i == row { continue; }
-            let mut new_row = Vec::with_capacity(n-1);
+            if i == row {
+                continue;
+            }
+            let mut new_row = Vec::with_capacity(n - 1);
             for j in 0..n {
-                if j == col { continue; }
+                if j == col {
+                    continue;
+                }
                 new_row.push(self.data[i][j]);
             }
             minor_data.push(new_row);
@@ -1176,27 +1180,15 @@ mod tests {
         #[test]
         fn test_det_3x3() {
             // Test identity matrix
-            let m = Matrix::from([
-                [1.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0],
-                [0.0, 0.0, 1.0]
-            ]);
+            let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
             assert_eq!(m.determinant(), 1.0);
 
             // Test example from subject
-            let m = Matrix::from([
-                [8.0, 5.0, -2.0],
-                [4.0, 7.0, 20.0],
-                [7.0, 6.0, 1.0]
-            ]);
+            let m = Matrix::from([[8.0, 5.0, -2.0], [4.0, 7.0, 20.0], [7.0, 6.0, 1.0]]);
             assert_eq!(m.determinant(), -174.0);
 
             // Test singular matrix
-            let m = Matrix::from([
-                [1.0, 2.0, 3.0],
-                [2.0, 4.0, 6.0],
-                [3.0, 6.0, 9.0]
-            ]);
+            let m = Matrix::from([[1.0, 2.0, 3.0], [2.0, 4.0, 6.0], [3.0, 6.0, 9.0]]);
             assert_eq!(m.determinant(), 0.0);
         }
 
@@ -1207,7 +1199,7 @@ mod tests {
                 [1.0, 0.0, 0.0, 0.0],
                 [0.0, 1.0, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0]
+                [0.0, 0.0, 0.0, 1.0],
             ]);
             assert_eq!(m.determinant(), 1.0);
 
@@ -1216,7 +1208,7 @@ mod tests {
                 [8.0, 5.0, -2.0, 4.0],
                 [4.0, 2.5, 20.0, 4.0],
                 [8.0, 5.0, 1.0, 4.0],
-                [28.0, -4.0, 17.0, 1.0]
+                [28.0, -4.0, 17.0, 1.0],
             ]);
             assert_eq!(m.determinant(), 1032.0);
         }
@@ -1236,7 +1228,7 @@ mod tests {
                 [0.0, 1.0, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 1.0]
+                [0.0, 0.0, 0.0, 0.0, 1.0],
             ]);
             m.determinant();
         }
