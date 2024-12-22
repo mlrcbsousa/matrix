@@ -1,4 +1,6 @@
-use matrix::{angle_cos, cross_product, lerp, linear_combination, Matrix, Scalar, Vector};
+use matrix::{
+    angle_cos, cross_product, lerp, linear_combination, projection, Matrix, Scalar, Vector,
+};
 use std::env;
 
 fn print_usage() {
@@ -10,6 +12,19 @@ fn print_usage() {
     println!("  ex00    - Add, Subtract and Scale");
     println!("  ex01    - Linear Combination");
     println!("  ex02    - Linear Interpolation");
+    println!("  ex03    - Dot Product");
+    println!("  ex04    - Norm");
+    println!("  ex05    - Cosine");
+    println!("  ex06    - Cross Product");
+    println!("  ex07    - Matrix Multiplication");
+    println!("  ex08    - Trace");
+    println!("  ex09    - Transpose");
+    println!("  ex10    - Row Echelon Form");
+    println!("  ex11    - Determinant");
+    println!("  ex12    - Inverse");
+    println!("  ex13    - Rank");
+    println!("  ex14    - Bonus: Projection matrix");
+    println!("  ex15    - Bonus: Complex vector spaces");
     println!();
     println!("If no exercise specified, runs all exercises");
 }
@@ -745,6 +760,27 @@ fn exercise_13() {
     println!("Rank: {}", m.rank());
 }
 
+fn exercise_14() {
+    println!("\nExercise 14 - Projection Matrix");
+    println!("--------------------------------");
+
+    let fov = 90.0_f32.to_radians(); // Field of view in radians (~90 degrees)
+    let ratio = 16.0 / 9.0; // Aspect ratio (16:9)
+    let near = 0.1; // Near clipping plane
+    let far = 100.0; // Far clipping plane
+
+    // Compute the projection matrix
+    let projection_matrix = projection(fov, ratio, near, far);
+
+    println!("Projection Matrix:");
+    projection_matrix.print();
+
+    // Explanation of usage
+    println!(
+        "\nThis matrix can now be used to transform 3D points in camera space to screen space."
+    );
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -771,7 +807,7 @@ fn main() {
         Some("ex11") => exercise_11(),
         Some("ex12") => exercise_12(),
         Some("ex13") => exercise_13(),
-        // Some("ex14") => exercise_14(),
+        Some("ex14") => exercise_14(),
         // Some("ex15") => exercise_15(),
         Some("--help" | "-h") => print_usage(),
         None => {
@@ -793,7 +829,7 @@ fn main() {
             exercise_11();
             exercise_12();
             exercise_13();
-            // exercise_14();
+            exercise_14();
             // exercise_15();
         }
         Some(arg) => {
