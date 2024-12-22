@@ -732,6 +732,38 @@ impl<K: Scalar> Matrix<K> {
 
         Ok(Matrix::new(inverse_data))
     }
+
+    /// Computes the rank of the matrix.
+    ///
+    /// The rank of a matrix is the number of linearly independent rows
+    /// in its row-echelon form. Rows are considered independent if they
+    /// contain non-zero values.
+    ///
+    /// # Complexity
+    /// - Time: O(n³) due to the row-echelon computation
+    /// - Space: O(n²) for intermediate storage
+    ///
+    /// # Example
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// let m = Matrix::from([
+    ///     [1.0, 2.0, 0.0, 0.0],
+    ///     [2.0, 4.0, 0.0, 0.0],
+    ///     [-1.0, 2.0, 1.0, 1.0],
+    /// ]);
+    /// assert_eq!(m.rank(), 2);
+    /// ```
+    pub fn rank(&self) -> usize {
+        let rref = self.row_echelon();
+        rref.data
+            .iter()
+            .filter(|row| {
+                row.iter()
+                    .any(|&val| Into::<f32>::into(val).abs() > Self::TOLERANCE)
+            })
+            .count()
+    }
 }
 
 // Implementation for initializing a Matrix with arrays
@@ -1365,6 +1397,43 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+
+    mod rank_tests {
+        use super::*;
+
+        #[test]
+        fn test_rank_full_rank() {
+            let m = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
+            assert_eq!(m.rank(), 3);
+        }
+
+        #[test]
+        fn test_rank_partial_rank() {
+            let m = Matrix::from([
+                [1.0, 2.0, 0.0, 0.0],
+                [2.0, 4.0, 0.0, 0.0],
+                [-1.0, 2.0, 1.0, 1.0],
+            ]);
+            assert_eq!(m.rank(), 2);
+        }
+
+        #[test]
+        fn test_rank_zero_matrix() {
+            let m = Matrix::from([[0.0, 0.0], [0.0, 0.0]]);
+            assert_eq!(m.rank(), 0);
+        }
+
+        #[test]
+        fn test_rank_non_square_matrix() {
+            let m = Matrix::from([
+                [8.0, 5.0, -2.0],
+                [4.0, 7.0, 20.0],
+                [7.0, 6.0, 1.0],
+                [21.0, 18.0, 7.0],
+            ]);
+            assert_eq!(m.rank(), 3);
         }
     }
 }

@@ -8,10 +8,12 @@
 
 mod lerp;
 mod matrix;
+mod projection;
 mod scalar;
 mod vector;
 
 pub use lerp::lerp;
 pub use matrix::Matrix;
+pub use projection::projection;
 pub use scalar::Scalar;
 pub use vector::{angle_cos, cross_product, linear_combination, Vector};
