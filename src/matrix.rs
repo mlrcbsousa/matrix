@@ -356,6 +356,50 @@ impl<K: Scalar> Matrix<K> {
         }
         sum
     }
+
+    /// Computes the transpose of this matrix.
+    ///
+    /// The transpose of a matrix A is formed by flipping matrix elements across its main diagonal:
+    /// - Each element aᵢⱼ becomes aⱼᵢ in the transposed matrix
+    /// - The shape changes from m×n to n×m
+    ///
+    /// # Complexity
+    /// - Time: O(nm) where n = rows, m = cols - must visit each element once
+    /// - Space: O(nm) - must allocate new matrix
+    ///
+    /// # Examples
+    /// ```
+    /// use matrix::Matrix;
+    ///
+    /// // Square matrix
+    /// let m = Matrix::from([
+    ///     [1.0, 2.0],
+    ///     [3.0, 4.0]
+    /// ]);
+    /// let m_t = m.transpose();
+    /// // m_t is [[1.0, 3.0], [2.0, 4.0]]
+    ///
+    /// // Rectangular matrix
+    /// let m = Matrix::from([
+    ///     [1.0, 2.0, 3.0],
+    ///     [4.0, 5.0, 6.0]
+    /// ]);
+    /// let m_t = m.transpose();
+    /// // m_t is [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
+    /// ```
+    pub fn transpose(&self) -> Matrix<K> {
+        let rows = self.rows();
+        let cols = self.cols();
+        let mut result = vec![vec![K::zero(); rows]; cols];
+
+        for i in 0..rows {
+            for j in 0..cols {
+                result[j][i] = self.data[i][j];
+            }
+        }
+
+        Matrix::new(result)
+    }
 }
 
 // Implementation for initializing a Matrix with arrays
@@ -676,6 +720,54 @@ mod tests {
         fn test_trace_non_square() {
             let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             m.trace();
+        }
+    }
+
+    mod transpose_tests {
+        use super::*;
+
+        #[test]
+        fn test_transpose_square() {
+            let m = Matrix::from([
+                [1.0, 2.0],
+                [3.0, 4.0]
+            ]);
+            let m_t = m.transpose();
+            assert_eq!(m_t.data, vec![vec![1.0, 3.0], vec![2.0, 4.0]]);
+        }
+
+        #[test]
+        fn test_transpose_rectangular() {
+            let m = Matrix::from([
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0]
+            ]);
+            let m_t = m.transpose();
+            assert_eq!(m_t.data, vec![
+                vec![1.0, 4.0],
+                vec![2.0, 5.0],
+                vec![3.0, 6.0]
+            ]);
+        }
+
+        #[test]
+        fn test_transpose_identity() {
+            let m = Matrix::from([
+                [1.0, 0.0],
+                [0.0, 1.0]
+            ]);
+            let m_t = m.transpose();
+            assert_eq!(m_t.data, m.data);
+        }
+
+        #[test]
+        fn test_transpose_twice() {
+            let m = Matrix::from([
+                [1.0, 2.0],
+                [3.0, 4.0]
+            ]);
+            let m_tt = m.transpose().transpose();
+            assert_eq!(m_tt.data, m.data);
         }
     }
 }

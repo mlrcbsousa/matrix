@@ -518,6 +518,43 @@ fn exercise_08() {
     println!("Trace: {}", symmetric.trace()); // 2.0
 }
 
+fn exercise_09() {
+    println!();
+    println!("Exercise 09 - Transpose");
+    println!("-----------------------");
+
+    // Square matrix example
+    let m1 = Matrix::from([
+        [1.0, 2.0],
+        [3.0, 4.0]
+    ]);
+    println!("\nOriginal square matrix:");
+    m1.print();
+    println!("\nTransposed:");
+    m1.transpose().print();
+
+    // Rectangular matrix example
+    let m2 = Matrix::from([
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0]
+    ]);
+    println!("\nOriginal rectangular matrix:");
+    m2.print();
+    println!("\nTransposed:");
+    m2.transpose().print();
+
+    // Identity matrix example
+    let identity = Matrix::from([
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0]
+    ]);
+    println!("\nIdentity matrix:");
+    identity.print();
+    println!("\nTransposed (should be identical):");
+    identity.transpose().print();
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -539,7 +576,7 @@ fn main() {
         Some("ex06") => exercise_06(),
         Some("ex07") => exercise_07(),
         Some("ex08") => exercise_08(),
-        // Some("ex09") => exercise_09(),
+        Some("ex09") => exercise_09(),
         // Some("ex10") => exercise_10(),
         // Some("ex11") => exercise_11(),
         // Some("ex12") => exercise_12(),
@@ -561,7 +598,7 @@ fn main() {
             exercise_06();
             exercise_07();
             exercise_08();
-            // exercise_09();
+            exercise_09();
             // exercise_10();
             // exercise_11();
             // exercise_12();
