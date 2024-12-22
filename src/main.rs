@@ -725,6 +725,26 @@ fn exercise_12() {
     }
 }
 
+fn exercise_13() {
+    println!();
+    println!("Exercise 13 - Rank");
+    println!("------------------");
+
+    let m = Matrix::from([
+        [1.0, 2.0, 0.0, 0.0],
+        [2.0, 4.0, 0.0, 0.0],
+        [-1.0, 2.0, 1.0, 1.0],
+    ]);
+    println!("Matrix:");
+    m.print();
+    println!("Rank: {}", m.rank());
+
+    let m = Matrix::from([[0.0, 0.0], [0.0, 0.0]]);
+    println!("\nZero matrix:");
+    m.print();
+    println!("Rank: {}", m.rank());
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -750,7 +770,7 @@ fn main() {
         Some("ex10") => exercise_10(),
         Some("ex11") => exercise_11(),
         Some("ex12") => exercise_12(),
-        // Some("ex13") => exercise_13(),
+        Some("ex13") => exercise_13(),
         // Some("ex14") => exercise_14(),
         // Some("ex15") => exercise_15(),
         Some("--help" | "-h") => print_usage(),
@@ -772,7 +792,7 @@ fn main() {
             exercise_10();
             exercise_11();
             exercise_12();
-            // exercise_13();
+            exercise_13();
             // exercise_14();
             // exercise_15();
         }
