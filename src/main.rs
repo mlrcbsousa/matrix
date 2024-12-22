@@ -551,10 +551,7 @@ fn exercise_10() {
     println!("------------------------------");
 
     // Example 1: Simple 2x2 matrix that reduces to identity
-    let m1 = Matrix::from([
-        [2.0, 4.0],
-        [1.0, 1.0],
-    ]);
+    let m1 = Matrix::from([[2.0, 4.0], [1.0, 1.0]]);
     println!("\nOriginal 2x2 matrix:");
     m1.print();
     println!("\nReduced Row Echelon Form:");
@@ -563,7 +560,7 @@ fn exercise_10() {
     // Example 2: Matrix with linear dependence
     let m2 = Matrix::from([
         [1.0, 2.0],
-        [2.0, 4.0],  // Multiple of first row
+        [2.0, 4.0], // Multiple of first row
     ]);
     println!("\nMatrix with dependent rows:");
     m2.print();
@@ -574,7 +571,7 @@ fn exercise_10() {
     let m3 = Matrix::from([
         [8.0, 5.0, -2.0, 4.0, 28.0],
         [4.0, 2.5, 20.0, 4.0, -4.0],
-        [8.0, 5.0, 1.0, 4.0, 17.0]
+        [8.0, 5.0, 1.0, 4.0, 17.0],
     ]);
     println!("\nLarger 3x5 matrix:");
     m3.print();
@@ -584,7 +581,7 @@ fn exercise_10() {
     // Example 4: Matrix requiring partial pivoting
     let m4 = Matrix::from([
         [0.001, 1.0],
-        [1.0, 1.0],    // Better pivot than first row
+        [1.0, 1.0], // Better pivot than first row
     ]);
     println!("\nMatrix requiring pivoting (small leading element):");
     m4.print();
@@ -596,7 +593,7 @@ fn exercise_10() {
     println!("2x + y = 4");
     println!("x + y = 3");
     let m5 = Matrix::from([
-        [2.0, 1.0, 4.0],  // Augmented matrix [A|b]
+        [2.0, 1.0, 4.0], // Augmented matrix [A|b]
         [1.0, 1.0, 3.0],
     ]);
     println!("\nAugmented matrix:");
