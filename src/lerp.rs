@@ -39,7 +39,7 @@ where
 {
     let mut a = u.clone();
     let mut b = v.clone();
-    a *= 1.0 - t;
+    b -= u;
     b *= t;
     a += b;
     a
@@ -83,6 +83,15 @@ mod tests {
         let v2 = create_test_vector_2();
         let result = lerp(v1, v2, 1.0);
         assert_eq!(result.data, vec![4.0, 2.0]);
+    }
+
+    #[test]
+    fn test_lerp_vector_f32() {
+        let v1: Vector<f32> = Vector::new(vec![1.0, 2.0, 3.0]);
+        let v2: Vector<f32> = Vector::new(vec![3.0, 5.0, 6.0]);
+        let t = 0.2;
+        let result = lerp(v1, v2, t);
+        assert_eq!(result.data, vec![1.4, 2.6, 3.6]);
     }
 
     #[test]
