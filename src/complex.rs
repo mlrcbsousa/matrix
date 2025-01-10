@@ -40,19 +40,6 @@ impl Complex {
         Self { r, i }
     }
 
-    /// Returns the complex conjugate (a - bi).
-    ///
-    /// # Examples
-    /// ```
-    /// use matrix::Complex;
-    ///
-    /// let z = Complex::new(1.0, 2.0);
-    /// let conj = z.conj();
-    /// ```
-    pub fn conj(&self) -> Self {
-        Self::new(self.r, -self.i)
-    }
-
     /// Returns the modulus (magnitude) of the complex number.
     ///
     /// # Examples
@@ -66,18 +53,9 @@ impl Complex {
         (self.r * self.r + self.i * self.i).sqrt()
     }
 
-    /// Returns the argument (angle) in radians.
-    ///
-    /// # Examples
-    /// ```
-    /// use matrix::Complex;
-    ///
-    /// let z = Complex::new(1.0, 1.0);
-    /// let theta = z.arg();
-    /// ```
-    pub fn arg(&self) -> f32 {
-        self.i.atan2(self.r)
-    }
+    // Other methods that could be implemented:
+    // - `arg`: argument (angle) in radians.
+    // - `conj`: complex conjugate (a - bi).
 }
 
 // Display implementation for pretty printing
@@ -212,10 +190,6 @@ mod tests {
     fn test_complex_methods() {
         let z = Complex::new(3.0, 4.0);
         assert_eq!(z.modulus(), 5.0);
-        assert_eq!(z.conj(), Complex::new(3.0, -4.0));
-        // Approximately pi/4
-        let z45 = Complex::new(1.0, 1.0);
-        assert!((z45.arg() - std::f32::consts::PI / 4.0).abs() < 1e-6);
     }
 
     #[test]

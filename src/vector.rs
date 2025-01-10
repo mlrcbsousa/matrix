@@ -19,7 +19,7 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 /// // Create a vector from a Vec
 /// let v = Vector::from([1.0, 2.0, 3.0]);
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Vector<K: Scalar> {
     /// The data stored in the Vector as a `Vec` of Scalar values.
     pub data: Vec<K>,
