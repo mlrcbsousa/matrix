@@ -74,22 +74,13 @@ impl Scalar for Complex {
     fn zero() -> Self {
         Self::new(0.0, 0.0)
     }
-
     fn one() -> Self {
         Self::new(1.0, 0.0)
     }
 
-    // Use complex multiplication and addition for FMA
-    fn fma(a: Self, b: Self, c: Self) -> Self {
-        (a * b) + c
-    }
-}
-
-// Implement conversion from Complex to f32 (for norm calculations)
-// gives Into<f32> trait for Complex for free
-impl From<Complex> for f32 {
-    fn from(val: Complex) -> Self {
-        val.modulus()
+    // Implement conversion from Complex to f32 (for norm calculations)
+    fn to_f32(&self) -> f32 {
+        self.modulus()
     }
 }
 
@@ -247,7 +238,7 @@ mod tests {
     #[test]
     fn test_complex_into_f32() {
         let z = Complex::new(3.0, 4.0);
-        let magnitude: f32 = z.into();
+        let magnitude: f32 = z.to_f32();
         assert_eq!(magnitude, 5.0);
     }
 

@@ -214,7 +214,7 @@ impl<K: Scalar> Vector<K> {
     pub fn norm_1(&self) -> f32 {
         let mut sum: f32 = 0.0;
         for val in &self.data {
-            sum += Into::<f32>::into(*val).abs();
+            sum += (*val).to_f32().abs();
         }
         sum
     }
@@ -240,7 +240,7 @@ impl<K: Scalar> Vector<K> {
     pub fn norm(&self) -> f32 {
         let mut sum_sq: f32 = 0.0;
         for val in &self.data {
-            let val_f32: f32 = (*val).into();
+            let val_f32: f32 = (*val).to_f32();
             // Use FMA for sum of squares: val² + previous_sum
             sum_sq = f32::fma(val_f32, val_f32, sum_sq);
         }
@@ -266,7 +266,7 @@ impl<K: Scalar> Vector<K> {
     pub fn norm_inf(&self) -> f32 {
         self.data
             .iter()
-            .map(|val| Into::<f32>::into(*val).abs())
+            .map(|val| (*val).to_f32().abs())
             .fold(0.0, f32::max)
     }
 }
@@ -362,7 +362,7 @@ pub fn angle_cos<K: Scalar>(u: &Vector<K>, v: &Vector<K>) -> f32 {
         panic!("Zero vectors have undefined angle");
     }
 
-    Into::<f32>::into(dot) / (norm_u * norm_v)
+    dot.to_f32() / (norm_u * norm_v)
 }
 
 /// Computes the cross product of two 3D vectors.
@@ -791,7 +791,7 @@ mod tests {
             let vu = cross_product(&v, &u);
 
             for (a, b) in uv.data.iter().zip(vu.data.iter()) {
-                assert!((*a + *b).abs() < f32::EPSILON);
+                assert!((*a + *b).to_f32().abs() < f32::EPSILON);
             }
         }
 

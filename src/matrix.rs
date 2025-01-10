@@ -496,7 +496,7 @@ impl<K: Scalar> Matrix<K> {
             let mut max_row = pivot_row;
             let mut max_val = f32::zero();
             for r in pivot_row..rows {
-                let val: f32 = result.data[r][pivot_col].into();
+                let val: f32 = result.data[r][pivot_col].to_f32();
                 if val.abs() > max_val {
                     max_val = val.abs();
                     max_row = r;
@@ -523,13 +523,13 @@ impl<K: Scalar> Matrix<K> {
             for r in 0..rows {
                 if r != pivot_row {
                     let factor = result.data[r][pivot_col];
-                    if Into::<f32>::into(factor).abs() > Self::TOLERANCE {
+                    if factor.to_f32().abs() > Self::TOLERANCE {
                         for c in pivot_col..cols {
                             result.data[r][c] =
                                 result.data[r][c] - factor * result.data[pivot_row][c];
 
                             // Clean up near-zero values
-                            if Into::<f32>::into(result.data[r][c]).abs() < Self::TOLERANCE {
+                            if result.data[r][c].to_f32().abs() < Self::TOLERANCE {
                                 result.data[r][c] = K::zero();
                             }
                         }
@@ -584,7 +584,7 @@ impl<K: Scalar> Matrix<K> {
 
         let n = self.rows();
         match n {
-            0 => panic!("Empty matrix has no determinant"),
+            0 => K::zero(), //panic!("Empty matrix has no determinant"),
             1 => self.data[0][0],
             2 => self.det2x2(),
             3 => self.det3x3(),
@@ -705,7 +705,7 @@ impl<K: Scalar> Matrix<K> {
         let det = self.determinant();
 
         // Check if matrix is invertible using tolerance
-        if Into::<f32>::into(det).abs() < Self::TOLERANCE {
+        if det.to_f32().abs() < Self::TOLERANCE {
             return Err(MatrixError::Singular);
         }
 
@@ -760,7 +760,7 @@ impl<K: Scalar> Matrix<K> {
             .iter()
             .filter(|row| {
                 row.iter()
-                    .any(|&val| Into::<f32>::into(val).abs() > Self::TOLERANCE)
+                    .any(|&val| val.to_f32().abs() > Self::TOLERANCE)
             })
             .count()
     }
@@ -1149,10 +1149,10 @@ mod tests {
 
             // Should reduce to identity matrix
             let result_data = rref.data;
-            assert!((result_data[0][0] - 1.0).abs() < 1e-6);
-            assert!((result_data[0][1] - 0.0).abs() < 1e-6);
-            assert!((result_data[1][0] - 0.0).abs() < 1e-6);
-            assert!((result_data[1][1] - 1.0).abs() < 1e-6);
+            assert!((result_data[0][0] - 1.0).to_f32().abs() < 1e-6);
+            assert!((result_data[0][1] - 0.0).to_f32().abs() < 1e-6);
+            assert!((result_data[1][0] - 0.0).to_f32().abs() < 1e-6);
+            assert!((result_data[1][1] - 1.0).to_f32().abs() < 1e-6);
         }
 
         #[test]
@@ -1165,9 +1165,9 @@ mod tests {
             let rref = m.row_echelon();
 
             // With our strict tolerance (1e-10), this small difference should be detected
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-10); // First row normalized
-            assert!((rref.data[0][1] - 1.0).abs() < 1e-10); // Should be 1, not 0
-            assert!(rref.data[1][0].abs() < 1e-10); // Should be eliminated
+            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10); // First row normalized
+            assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10); // Should be 1, not 0
+            assert!(rref.data[1][0].to_f32().abs() < 1e-10); // Should be eliminated
             assert!(Into::<f32>::into(rref.data[1][1]) - 1e-8 < 1e-10); // Should have the small difference
         }
 
@@ -1181,10 +1181,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // First row should be [1, 1], second row should be zeroed
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);
-            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);
-            assert!(rref.data[1][0].abs() < 1e-10);
-            assert!(rref.data[1][1].abs() < 1e-10);
+            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10);
+            assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10);
+            assert!(rref.data[1][0].to_f32().abs() < 1e-10);
+            assert!(rref.data[1][1].to_f32().abs() < 1e-10);
         }
 
         #[test]
@@ -1197,10 +1197,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // Should treat rows as dependent since difference is below tolerance
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);
-            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);
-            assert!(rref.data[1][0].abs() < 1e-10);
-            assert!(rref.data[1][1].abs() < 1e-10);
+            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10);
+            assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10);
+            assert!(rref.data[1][0].to_f32().abs() < 1e-10);
+            assert!(rref.data[1][1].to_f32().abs() < 1e-10);
         }
 
         #[test]
@@ -1213,25 +1213,25 @@ mod tests {
             let rref = m.row_echelon();
 
             // Check first row - [1.0, 0.625, 0.0, 0.0, -12.1666667]
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-6);
-            assert!((rref.data[0][1] - 0.625).abs() < 1e-6);
-            assert!((rref.data[0][2] - 0.0).abs() < 1e-6);
-            assert!((rref.data[0][3] - 0.0).abs() < 1e-6);
-            assert!((rref.data[0][4] - (-12.1666667)).abs() < 1e-6);
+            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[0][1] - 0.625).to_f32().abs() < 1e-6);
+            assert!((rref.data[0][2] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[0][3] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[0][4] - (-12.1666667)).to_f32().abs() < 1e-6);
 
             // Check second row - [0.0, 0.0, 1.0, 0.0, -3.6666667]
-            assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][2] - 1.0).abs() < 1e-6);
-            assert!((rref.data[1][3] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][4] - (-3.6666667)).abs() < 1e-6);
+            assert!((rref.data[1][0] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[1][1] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[1][2] - 1.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[1][3] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[1][4] - (-3.6666667)).to_f32().abs() < 1e-6);
 
             // Check third row - [0.0, 0.0, 0.0, 1.0, 29.5]
-            assert!((rref.data[2][0] - 0.0).abs() < 1e-6);
-            assert!((rref.data[2][1] - 0.0).abs() < 1e-6);
-            assert!((rref.data[2][2] - 0.0).abs() < 1e-6);
-            assert!((rref.data[2][3] - 1.0).abs() < 1e-6);
-            assert!((rref.data[2][4] - 29.5).abs() < 1e-6);
+            assert!((rref.data[2][0] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[2][1] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[2][2] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[2][3] - 1.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[2][4] - 29.5).to_f32().abs() < 1e-6);
         }
 
         #[test]
@@ -1258,10 +1258,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // Second row should reduce to zero
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-6);
-            assert!((rref.data[0][1] - 2.0).abs() < 1e-6);
-            assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
+            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[0][1] - 2.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[1][0] - 0.0).to_f32().abs() < 1e-6);
+            assert!((rref.data[1][1] - 0.0).to_f32().abs() < 1e-6);
         }
     }
     mod determinant_tests {
@@ -1364,7 +1364,7 @@ mod tests {
             for i in 0..2 {
                 for j in 0..2 {
                     assert!(
-                        (inv.data[i][j] - expected.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs() < Matrix::<f32>::TOLERANCE
                     );
                 }
             }
@@ -1393,7 +1393,7 @@ mod tests {
             for i in 0..2 {
                 for j in 0..2 {
                     assert!(
-                        (prod.data[i][j] - identity.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                        (prod.data[i][j] - identity.data[i][j]).to_f32().abs() < Matrix::<f32>::TOLERANCE
                     );
                 }
             }

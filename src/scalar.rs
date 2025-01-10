@@ -39,7 +39,6 @@ pub trait Scalar:
     DivAssign +             // a /= b
     Debug +                 // println!("{:?}", a)
     Display +               // println!("{}", a)
-    Into<f32> +             // Convert to f32
     Neg<Output = Self>      // -a
 {
     /// Returns the additive identity (zero) for this type.
@@ -49,6 +48,10 @@ pub trait Scalar:
     /// Returns the multiplicative identity (one) for this type.
     /// This element satisfies `a * one() = a` for all `a`.
     fn one() -> Self;
+
+    /// Convert to f32.
+    /// This is useful for converting scalar types to f32 for operations like dot products.
+    fn to_f32(&self) -> f32;
 
     /// Performs fused multiply-add: (a * b) + c
     ///
@@ -100,6 +103,9 @@ impl Scalar for f32 {
     fn one() -> Self {
         1.0
     }
+    fn to_f32(&self) -> f32 {
+        *self
+    }
 
     // Safe, portable FMA using std lib
     // Internally optimizes to appropriate FMA instruction
@@ -109,24 +115,79 @@ impl Scalar for f32 {
     }
 }
 
+/// Implementation of `Scalar` trait for `f64`.
+impl Scalar for f64 {
+    fn zero() -> Self {
+        0.0
+    }
+    fn one() -> Self {
+        1.0
+    }
+    fn to_f32(&self) -> f32 {
+        *self as f32
+    }
+
+    // Safe, portable FMA using std lib
+    // Internally optimizes to appropriate FMA instruction
+    // stabilized version of fmaf32 intrinsic
+    fn fma(a: Self, b: Self, c: Self) -> Self {
+        a.mul_add(b, c)
+    }
+}
+
+/// Implementation of `Scalar` trait for `i32`.
+impl Scalar for i32 {
+    fn zero() -> Self {
+        0
+    }
+    fn one() -> Self {
+        1
+    }
+    fn to_f32(&self) -> f32 {
+        *self as f32
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_f32_scalar_zero() {
+    fn test_scalar_zero() {
         assert_eq!(f32::zero(), 0.0);
+        assert_eq!(f64::zero(), 0.0);
     }
 
     #[test]
-    fn test_f32_scalar_one() {
+    fn test_scalar_one() {
         assert_eq!(f32::one(), 1.0);
+        assert_eq!(f64::one(), 1.0);
     }
 
     #[test]
     fn test_f32_scalar_operations() {
         let mut a: f32 = 2.0;
         let b: f32 = 3.0;
+
+        assert_eq!(a + b, 5.0);
+        assert_eq!(a - b, -1.0);
+        assert_eq!(a * b, 6.0);
+        assert_eq!(a / b, 2.0 / 3.0);
+
+        a += b;
+        assert_eq!(a, 5.0);
+        a -= b;
+        assert_eq!(a, 2.0);
+        a *= b;
+        assert_eq!(a, 6.0);
+        a /= b;
+        assert_eq!(a, 2.0);
+    }
+
+    #[test]
+    fn test_f64_scalar_operations() {
+        let mut a: f64 = 2.0;
+        let b: f64 = 3.0;
 
         assert_eq!(a + b, 5.0);
         assert_eq!(a - b, -1.0);
@@ -157,6 +218,19 @@ mod tests {
     }
 
     #[test]
+    fn test_f64_fma() {
+        let a = 2.0f64;
+        let b = 3.0f64;
+        let c = 4.0f64;
+
+        let result = f64::fma(a, b, c);
+        let expected = (a * b) + c;
+
+        assert_eq!(result, expected);
+        assert_eq!(result, 10.0);
+    }
+
+    #[test]
     fn test_f32_fma_precision() {
         // Example where FMA provides better precision
         let a = 0.1f32;
@@ -168,5 +242,19 @@ mod tests {
 
         // Results may differ slightly due to FMA's single rounding
         assert!((fma_result - standard).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn test_f64_fma_precision() {
+        // Example where FMA provides better precision
+        let a = 0.1f64;
+        let b = 0.2f64;
+        let c = 0.3f64;
+
+        let fma_result = f64::fma(a, b, c);
+        let standard = (a * b) + c;
+
+        // Results may differ slightly due to FMA's single rounding
+        assert!((fma_result - standard).abs() < f64::EPSILON);
     }
 }
