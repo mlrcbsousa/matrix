@@ -584,7 +584,7 @@ impl<K: Scalar> Matrix<K> {
 
         let n = self.rows();
         match n {
-            0 => K::zero(), //panic!("Empty matrix has no determinant"),
+            0 => panic!("Empty matrix has no determinant"),
             1 => self.data[0][0],
             2 => self.det2x2(),
             3 => self.det3x3(),
@@ -758,10 +758,7 @@ impl<K: Scalar> Matrix<K> {
         let rref = self.row_echelon();
         rref.data
             .iter()
-            .filter(|row| {
-                row.iter()
-                    .any(|&val| val.to_f32().abs() > Self::TOLERANCE)
-            })
+            .filter(|row| row.iter().any(|&val| val.to_f32().abs() > Self::TOLERANCE))
             .count()
     }
 }
@@ -1364,7 +1361,8 @@ mod tests {
             for i in 0..2 {
                 for j in 0..2 {
                     assert!(
-                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs() < Matrix::<f32>::TOLERANCE
+                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs()
+                            < Matrix::<f32>::TOLERANCE
                     );
                 }
             }
@@ -1393,7 +1391,8 @@ mod tests {
             for i in 0..2 {
                 for j in 0..2 {
                     assert!(
-                        (prod.data[i][j] - identity.data[i][j]).to_f32().abs() < Matrix::<f32>::TOLERANCE
+                        (prod.data[i][j] - identity.data[i][j]).to_f32().abs()
+                            < Matrix::<f32>::TOLERANCE
                     );
                 }
             }
