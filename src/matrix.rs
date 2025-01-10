@@ -1504,37 +1504,17 @@ mod tests {
 
         #[test]
         fn test_inverse_from_subject() {
-            let u = Matrix::from([
-                [1., 0., 0.],
-                [0., 1., 0.],
-                [0., 0., 1.],
-            ]);
+            let u = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
             let inv = u.inverse().unwrap();
-            let expected = Matrix::from([
-                [1.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0],
-                [0.0, 0.0, 1.0],
-            ]);
+            let expected = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
             assert_eq!(inv.data, expected.data);
 
-            let u = Matrix::from([
-                [2., 0., 0.],
-                [0., 2., 0.],
-                [0., 0., 2.],
-            ]);
+            let u = Matrix::from([[2., 0., 0.], [0., 2., 0.], [0., 0., 2.]]);
             let inv = u.inverse().unwrap();
-            let expected = Matrix::from([
-                [0.5, 0.0, 0.0],
-                [0.0, 0.5, 0.0],
-                [0.0, 0.0, 0.5],
-            ]);
+            let expected = Matrix::from([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]]);
             assert_eq!(inv.data, expected.data);
 
-            let u = Matrix::from([
-                [8., 5., -2.],
-                [4., 7., 20.],
-                [7., 6., 1.],
-            ]);
+            let u = Matrix::from([[8., 5., -2.], [4., 7., 20.], [7., 6., 1.]]);
             let inv = u.inverse().unwrap();
             let expected = Matrix::from([
                 [0.649425287, 0.097701149, -0.655172414],
