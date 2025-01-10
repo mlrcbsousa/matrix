@@ -537,6 +537,58 @@ mod tests {
             v1.add(&v2);
         }
 
+        mod evaluation_add_tests {
+            use super::*;
+
+            #[test]
+            fn test_vector_add_zero() {
+                let mut v1 = Vector::from([0, 0]);
+                let v2 = Vector::from([0, 0]);
+                v1.add(&v2);
+                assert_eq!(v1.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_vector_add_unit() {
+                let mut v1 = Vector::from([1, 0]);
+                let v2 = Vector::from([0, 1]);
+                v1.add(&v2);
+                assert_eq!(v1.data, vec![1, 1]);
+            }
+
+            #[test]
+            fn test_vector_add_same() {
+                let mut v1 = Vector::from([1, 1]);
+                let v2 = Vector::from([1, 1]);
+                v1.add(&v2);
+                assert_eq!(v1.data, vec![2, 2]);
+            }
+
+            #[test]
+            fn test_vector_add_42() {
+                let mut v1 = Vector::from([21, 21]);
+                let v2 = Vector::from([21, 21]);
+                v1.add(&v2);
+                assert_eq!(v1.data, vec![42, 42]);
+            }
+
+            #[test]
+            fn test_vector_add_opposite() {
+                let mut v1 = Vector::from([-21, 21]);
+                let v2 = Vector::from([21, -21]);
+                v1.add(&v2);
+                assert_eq!(v1.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_vector_add_long() {
+                let mut v1 = Vector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                let v2 = Vector::from([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+                v1.add(&v2);
+                assert_eq!(v1.data, vec![9; 10]);
+            }
+        }
+
         #[test]
         fn test_vector_sub() {
             let mut v1 = Vector::from([4.0, 5.0, 6.0]);
@@ -561,6 +613,58 @@ mod tests {
             v1.sub(&v2);
         }
 
+        mod evaluation_sub_tests {
+            use super::*;
+
+            #[test]
+            fn test_vector_sub_zero() {
+                let mut v1 = Vector::from([0, 0]);
+                let v2 = Vector::from([0, 0]);
+                v1.sub(&v2);
+                assert_eq!(v1.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_vector_sub_unit() {
+                let mut v1 = Vector::from([1, 0]);
+                let v2 = Vector::from([0, 1]);
+                v1.sub(&v2);
+                assert_eq!(v1.data, vec![1, -1]);
+            }
+
+            #[test]
+            fn test_vector_sub_same() {
+                let mut v1 = Vector::from([1, 1]);
+                let v2 = Vector::from([1, 1]);
+                v1.sub(&v2);
+                assert_eq!(v1.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_vector_sub_same_21() {
+                let mut v1 = Vector::from([21, 21]);
+                let v2 = Vector::from([21, 21]);
+                v1.sub(&v2);
+                assert_eq!(v1.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_vector_sub_42() {
+                let mut v1 = Vector::from([-21, 21]);
+                let v2 = Vector::from([21, -21]);
+                v1.sub(&v2);
+                assert_eq!(v1.data, vec![-42, 42]);
+            }
+
+            #[test]
+            fn test_vector_sub_long() {
+                let mut v1 = Vector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                let v2 = Vector::from([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+                v1.sub(&v2);
+                assert_eq!(v1.data, vec![-9, -7, -5, -3, -1, 1, 3, 5, 7, 9]);
+            }
+        }
+
         #[test]
         fn test_vector_scl() {
             let mut v = create_test_vector();
@@ -580,6 +684,45 @@ mod tests {
             let mut v = create_test_vector();
             v.scl(0.0);
             assert_eq!(v.data, vec![0.0, 0.0, 0.0]);
+        }
+
+        mod evaluation_scl_tests {
+            use super::*;
+
+            #[test]
+            fn test_vector_scl_zero() {
+                let mut v = Vector::from([0, 0]);
+                v.scl(1);
+                assert_eq!(v.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_vector_scl_unit() {
+                let mut v = Vector::from([1, 0]);
+                v.scl(1);
+                assert_eq!(v.data, vec![1, 0]);
+            }
+
+            #[test]
+            fn test_vector_scl_same() {
+                let mut v = Vector::from([1, 1]);
+                v.scl(2);
+                assert_eq!(v.data, vec![2, 2]);
+            }
+
+            #[test]
+            fn test_vector_scl_same_21() {
+                let mut v = Vector::from([21, 21]);
+                v.scl(2);
+                assert_eq!(v.data, vec![42, 42]);
+            }
+
+            #[test]
+            fn test_vector_scl_42() {
+                let mut v = Vector::from([42.0, 42.0]);
+                v.scl(0.5);
+                assert_eq!(v.data, vec![21.0, 21.0]);
+            }
         }
     }
 

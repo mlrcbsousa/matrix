@@ -941,6 +941,42 @@ mod tests {
             m1.add(&m2);
         }
 
+        mod evaluation_matrix_add_tests {
+            use super::*;
+
+            #[test]
+            fn test_add_zero() {
+                let mut m1 = Matrix::from([[0, 0], [0, 0]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_add_identity() {
+                let mut m1 = Matrix::from([[1, 0], [0, 1]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_add_same() {
+                let mut m1 = Matrix::from([[1, 1], [1, 1]]);
+                let m2 = Matrix::from([[1, 1], [1, 1]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![2, 2], vec![2, 2]]);
+            }
+
+            #[test]
+            fn test_add_42() {
+                let mut m1 = Matrix::from([[21, 21], [21, 21]]);
+                let m2 = Matrix::from([[21, 21], [21, 21]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![42, 42], vec![42, 42]]);
+            }
+        }
+
         #[test]
         fn test_matrix_sub() {
             let mut m1 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
@@ -965,6 +1001,42 @@ mod tests {
             m1.sub(&m2);
         }
 
+        mod evaluation_matrix_sub_tests {
+            use super::*;
+
+            #[test]
+            fn test_sub_zero() {
+                let mut m1 = Matrix::from([[0, 0], [0, 0]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_sub_identity() {
+                let mut m1 = Matrix::from([[1, 0], [0, 1]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_sub_same() {
+                let mut m1 = Matrix::from([[1, 1], [1, 1]]);
+                let m2 = Matrix::from([[1, 1], [1, 1]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_sub_42() {
+                let mut m1 = Matrix::from([[21, 21], [21, 21]]);
+                let m2 = Matrix::from([[21, 21], [21, 21]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+        }
+
         #[test]
         fn test_matrix_scl() {
             let mut m = create_test_matrix();
@@ -984,6 +1056,38 @@ mod tests {
             let mut m = create_test_matrix();
             m.scl(0.0);
             assert_eq!(m.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
+        }
+
+        mod evaluation_matrix_scl_tests {
+            use super::*;
+
+            #[test]
+            fn test_scl_zero() {
+                let mut m = Matrix::from([[0, 0], [0, 0]]);
+                m.scl(0);
+                assert_eq!(m.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_scl_identity() {
+                let mut m = Matrix::from([[1, 0], [0, 1]]);
+                m.scl(1);
+                assert_eq!(m.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_scl_2() {
+                let mut m = Matrix::from([[1, 2], [3, 4]]);
+                m.scl(2);
+                assert_eq!(m.data, vec![vec![2, 4], vec![6, 8]]);
+            }
+
+            #[test]
+            fn test_scl_half() {
+                let mut m = Matrix::from([[21.0, 21.0], [21.0, 21.0]]);
+                m.scl(0.5);
+                assert_eq!(m.data, vec![vec![10.5, 10.5], vec![10.5, 10.5]]);
+            }
         }
     }
 
@@ -1165,7 +1269,7 @@ mod tests {
             assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10); // First row normalized
             assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10); // Should be 1, not 0
             assert!(rref.data[1][0].to_f32().abs() < 1e-10); // Should be eliminated
-            assert!(Into::<f32>::into(rref.data[1][1]) - 1e-8 < 1e-10); // Should have the small difference
+            assert!(rref.data[1][1] - 1e-8 < 1e-10); // Should have the small difference
         }
 
         #[test]
@@ -1392,6 +1496,55 @@ mod tests {
                 for j in 0..2 {
                     assert!(
                         (prod.data[i][j] - identity.data[i][j]).to_f32().abs()
+                            < Matrix::<f32>::TOLERANCE
+                    );
+                }
+            }
+        }
+
+        #[test]
+        fn test_inverse_from_subject() {
+            let u = Matrix::from([
+                [1., 0., 0.],
+                [0., 1., 0.],
+                [0., 0., 1.],
+            ]);
+            let inv = u.inverse().unwrap();
+            let expected = Matrix::from([
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ]);
+            assert_eq!(inv.data, expected.data);
+
+            let u = Matrix::from([
+                [2., 0., 0.],
+                [0., 2., 0.],
+                [0., 0., 2.],
+            ]);
+            let inv = u.inverse().unwrap();
+            let expected = Matrix::from([
+                [0.5, 0.0, 0.0],
+                [0.0, 0.5, 0.0],
+                [0.0, 0.0, 0.5],
+            ]);
+            assert_eq!(inv.data, expected.data);
+
+            let u = Matrix::from([
+                [8., 5., -2.],
+                [4., 7., 20.],
+                [7., 6., 1.],
+            ]);
+            let inv = u.inverse().unwrap();
+            let expected = Matrix::from([
+                [0.649425287, 0.097701149, -0.655172414],
+                [-0.781609195, -0.126436782, 0.965517241],
+                [0.143678161, 0.074712644, -0.206896552],
+            ]);
+            for i in 0..3 {
+                for j in 0..3 {
+                    assert!(
+                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs()
                             < Matrix::<f32>::TOLERANCE
                     );
                 }
