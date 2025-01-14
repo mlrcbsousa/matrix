@@ -1288,7 +1288,6 @@ mod tests {
                 assert_eq!(m.trace(), 3);
             }
         }
-
     }
 
     mod transpose_tests {
@@ -1349,11 +1348,7 @@ mod tests {
 
             #[test]
             fn test_transpose_3x3_identity() {
-                let m = Matrix::from([
-                    [1, 0, 0],
-                    [0, 1, 0],
-                    [0, 0, 1]
-                ]);
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
                 assert_eq!(m.transpose().data, m.data);
             }
 
@@ -1546,7 +1541,6 @@ mod tests {
                 assert_eq!(rref.data, vec![vec![1, 2], vec![0, 0]]);
             }
         }
-
     }
     mod determinant_tests {
         use super::*;
@@ -1675,11 +1669,7 @@ mod tests {
 
             #[test]
             fn test_det_3x3_identity() {
-                let m = Matrix::from([
-                    [1, 0, 0],
-                    [0, 1, 0],
-                    [0, 0, 1]
-                ]);
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
                 assert_eq!(m.determinant(), 1);
             }
         }
@@ -1814,11 +1804,7 @@ mod tests {
 
             #[test]
             fn test_inverse_3x3_identity() {
-                let m = Matrix::from([
-                    [1, 0, 0],
-                    [0, 1, 0],
-                    [0, 0, 1]
-                ]);
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
                 let inv = m.inverse().unwrap();
                 assert_eq!(inv.data, m.data);
             }
@@ -1908,11 +1894,7 @@ mod tests {
 
             #[test]
             fn test_rank_3x3_identity() {
-                let m = Matrix::from([
-                    [1, 0, 0],
-                    [0, 1, 0],
-                    [0, 0, 1]
-                ]);
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
                 assert_eq!(m.rank(), 3);
             }
         }
