@@ -40,19 +40,6 @@ impl Complex {
         Self { r, i }
     }
 
-    /// Returns the complex conjugate (a - bi).
-    ///
-    /// # Examples
-    /// ```
-    /// use matrix::Complex;
-    ///
-    /// let z = Complex::new(1.0, 2.0);
-    /// let conj = z.conj();
-    /// ```
-    pub fn conj(&self) -> Self {
-        Self::new(self.r, -self.i)
-    }
-
     /// Returns the modulus (magnitude) of the complex number.
     ///
     /// # Examples
@@ -66,18 +53,9 @@ impl Complex {
         (self.r * self.r + self.i * self.i).sqrt()
     }
 
-    /// Returns the argument (angle) in radians.
-    ///
-    /// # Examples
-    /// ```
-    /// use matrix::Complex;
-    ///
-    /// let z = Complex::new(1.0, 1.0);
-    /// let theta = z.arg();
-    /// ```
-    pub fn arg(&self) -> f32 {
-        self.i.atan2(self.r)
-    }
+    // Other methods that could be implemented:
+    // - `arg`: argument (angle) in radians.
+    // - `conj`: complex conjugate (a - bi).
 }
 
 // Display implementation for pretty printing
@@ -96,22 +74,13 @@ impl Scalar for Complex {
     fn zero() -> Self {
         Self::new(0.0, 0.0)
     }
-
     fn one() -> Self {
         Self::new(1.0, 0.0)
     }
 
-    // Use complex multiplication and addition for FMA
-    fn fma(a: Self, b: Self, c: Self) -> Self {
-        (a * b) + c
-    }
-}
-
-// Implement conversion from Complex to f32 (for norm calculations)
-// gives Into<f32> trait for Complex for free
-impl From<Complex> for f32 {
-    fn from(val: Complex) -> Self {
-        val.modulus()
+    // Implement conversion from Complex to f32 (for norm calculations)
+    fn to_f32(&self) -> f32 {
+        self.modulus()
     }
 }
 
@@ -212,10 +181,6 @@ mod tests {
     fn test_complex_methods() {
         let z = Complex::new(3.0, 4.0);
         assert_eq!(z.modulus(), 5.0);
-        assert_eq!(z.conj(), Complex::new(3.0, -4.0));
-        // Approximately pi/4
-        let z45 = Complex::new(1.0, 1.0);
-        assert!((z45.arg() - std::f32::consts::PI / 4.0).abs() < 1e-6);
     }
 
     #[test]
@@ -261,19 +226,19 @@ mod tests {
         let v = Vector::new(vec![Complex::new(1.0, 1.0), Complex::new(2.0, 2.0)]);
 
         // 1-norm: |1 + i| + |2 + 2i| = √2 + 2√2
-        assert!((v.norm_1() - (2.0f32.sqrt() * 3.0)).abs() < 1e-6);
+        assert_eq!(v.norm_1(), (2.0f32.sqrt() * 3.0));
 
         // 2-norm: √(|1 + i|² + |2 + 2i|²) = √(2 + 8) = √10
-        assert!((v.norm() - 10.0f32.sqrt()).abs() < 1e-6);
+        assert_eq!(v.norm(), 10.0f32.sqrt());
 
         // inf-norm: max(|1 + i|, |2 + 2i|) = 2√2
-        assert!((v.norm_inf() - (2.0f32.sqrt() * 2.0)).abs() < 1e-6);
+        assert_eq!(v.norm_inf(), (2.0f32.sqrt() * 2.0));
     }
 
     #[test]
     fn test_complex_into_f32() {
         let z = Complex::new(3.0, 4.0);
-        let magnitude: f32 = z.into();
+        let magnitude: f32 = z.to_f32();
         assert_eq!(magnitude, 5.0);
     }
 

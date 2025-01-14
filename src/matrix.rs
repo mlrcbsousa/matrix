@@ -305,7 +305,7 @@ impl<K: Scalar> Matrix<K> {
 
         // For each row of matrix
         for i in 0..self.rows() {
-            // Compute dot product with vector
+            // Compute product with vector
             for (j, v_j) in vec.data.iter().enumerate() {
                 result[i] = K::fma(self.data[i][j], *v_j, result[i]);
             }
@@ -354,7 +354,7 @@ impl<K: Scalar> Matrix<K> {
         // For each element of result matrix
         for i in 0..n {
             for j in 0..p {
-                // Compute dot product of row i from first and col j from second
+                // Compute product of row i from first and col j from second
                 for k in 0..m {
                     result[i][j] = K::fma(self.data[i][k], other.data[k][j], result[i][j]);
                 }
@@ -496,7 +496,7 @@ impl<K: Scalar> Matrix<K> {
             let mut max_row = pivot_row;
             let mut max_val = f32::zero();
             for r in pivot_row..rows {
-                let val: f32 = result.data[r][pivot_col].into();
+                let val: f32 = result.data[r][pivot_col].to_f32();
                 if val.abs() > max_val {
                     max_val = val.abs();
                     max_row = r;
@@ -523,13 +523,13 @@ impl<K: Scalar> Matrix<K> {
             for r in 0..rows {
                 if r != pivot_row {
                     let factor = result.data[r][pivot_col];
-                    if Into::<f32>::into(factor).abs() > Self::TOLERANCE {
+                    if factor.to_f32().abs() > Self::TOLERANCE {
                         for c in pivot_col..cols {
                             result.data[r][c] =
                                 result.data[r][c] - factor * result.data[pivot_row][c];
 
                             // Clean up near-zero values
-                            if Into::<f32>::into(result.data[r][c]).abs() < Self::TOLERANCE {
+                            if result.data[r][c].to_f32().abs() < Self::TOLERANCE {
                                 result.data[r][c] = K::zero();
                             }
                         }
@@ -705,7 +705,7 @@ impl<K: Scalar> Matrix<K> {
         let det = self.determinant();
 
         // Check if matrix is invertible using tolerance
-        if Into::<f32>::into(det).abs() < Self::TOLERANCE {
+        if det.to_f32().abs() < Self::TOLERANCE {
             return Err(MatrixError::Singular);
         }
 
@@ -758,10 +758,7 @@ impl<K: Scalar> Matrix<K> {
         let rref = self.row_echelon();
         rref.data
             .iter()
-            .filter(|row| {
-                row.iter()
-                    .any(|&val| Into::<f32>::into(val).abs() > Self::TOLERANCE)
-            })
+            .filter(|row| row.iter().any(|&val| val.to_f32().abs() > Self::TOLERANCE))
             .count()
     }
 }
@@ -944,6 +941,42 @@ mod tests {
             m1.add(&m2);
         }
 
+        mod evaluation_add_tests {
+            use super::*;
+
+            #[test]
+            fn test_add_zero() {
+                let mut m1 = Matrix::from([[0, 0], [0, 0]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_add_identity() {
+                let mut m1 = Matrix::from([[1, 0], [0, 1]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_add_same() {
+                let mut m1 = Matrix::from([[1, 1], [1, 1]]);
+                let m2 = Matrix::from([[1, 1], [1, 1]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![2, 2], vec![2, 2]]);
+            }
+
+            #[test]
+            fn test_add_42() {
+                let mut m1 = Matrix::from([[21, 21], [21, 21]]);
+                let m2 = Matrix::from([[21, 21], [21, 21]]);
+                m1.add(&m2);
+                assert_eq!(m1.data, vec![vec![42, 42], vec![42, 42]]);
+            }
+        }
+
         #[test]
         fn test_matrix_sub() {
             let mut m1 = Matrix::from([[5.0, 6.0], [7.0, 8.0]]);
@@ -968,6 +1001,42 @@ mod tests {
             m1.sub(&m2);
         }
 
+        mod evaluation_sub_tests {
+            use super::*;
+
+            #[test]
+            fn test_sub_zero() {
+                let mut m1 = Matrix::from([[0, 0], [0, 0]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_sub_identity() {
+                let mut m1 = Matrix::from([[1, 0], [0, 1]]);
+                let m2 = Matrix::from([[0, 0], [0, 0]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_sub_same() {
+                let mut m1 = Matrix::from([[1, 1], [1, 1]]);
+                let m2 = Matrix::from([[1, 1], [1, 1]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_sub_42() {
+                let mut m1 = Matrix::from([[21, 21], [21, 21]]);
+                let m2 = Matrix::from([[21, 21], [21, 21]]);
+                m1.sub(&m2);
+                assert_eq!(m1.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+        }
+
         #[test]
         fn test_matrix_scl() {
             let mut m = create_test_matrix();
@@ -987,6 +1056,38 @@ mod tests {
             let mut m = create_test_matrix();
             m.scl(0.0);
             assert_eq!(m.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
+        }
+
+        mod evaluation_scl_tests {
+            use super::*;
+
+            #[test]
+            fn test_scl_zero() {
+                let mut m = Matrix::from([[0, 0], [0, 0]]);
+                m.scl(0);
+                assert_eq!(m.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_scl_identity() {
+                let mut m = Matrix::from([[1, 0], [0, 1]]);
+                m.scl(1);
+                assert_eq!(m.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_scl_2() {
+                let mut m = Matrix::from([[1, 2], [3, 4]]);
+                m.scl(2);
+                assert_eq!(m.data, vec![vec![2, 4], vec![6, 8]]);
+            }
+
+            #[test]
+            fn test_scl_half() {
+                let mut m = Matrix::from([[21.0, 21.0], [21.0, 21.0]]);
+                m.scl(0.5);
+                assert_eq!(m.data, vec![vec![10.5, 10.5], vec![10.5, 10.5]]);
+            }
         }
     }
 
@@ -1023,6 +1124,74 @@ mod tests {
             let m = Matrix::from([[1.0, 2.0]]);
             let v = Vector::from([1.0, 2.0, 3.0]);
             m.mul_vec(&v);
+        }
+
+        mod evaluation_linear_transform_tests {
+            use super::*;
+
+            #[test]
+            fn test_matrix_vector_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                let v = Vector::from([4, 2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([0, 0]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([-4, -2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([10, 30]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_matrix_vector_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                let v = Vector::from([4, 2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, v.data);
+
+                let v = Vector::from([0, 0]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([-4, -2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![-4, -2]);
+
+                let v = Vector::from([10, 30]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![10, 30]);
+            }
+
+            #[test]
+            fn test_matrix_vector_units() {
+                let m = Matrix::from([[1, 1], [1, 1]]);
+                let v = Vector::from([4, 2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![6, 6]);
+            }
+
+            #[test]
+            fn test_matrix_vector_scale() {
+                let m = Matrix::from([[2, 0], [0, 2]]);
+                let v = Vector::from([2, 1]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![4, 2]);
+            }
+
+            #[test]
+            fn test_matrix_vector_halve() {
+                let m = Matrix::from([[0.5, 0.0], [0.0, 0.5]]);
+                let v = Vector::from([4.0, 2.0]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![2.0, 1.0]);
+            }
         }
 
         #[test]
@@ -1085,6 +1254,40 @@ mod tests {
             let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             m.trace();
         }
+
+        mod evaluation_trace_tests {
+            use super::*;
+
+            #[test]
+            fn test_trace_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.trace(), 0);
+            }
+
+            #[test]
+            fn test_trace_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.trace(), 2);
+            }
+
+            #[test]
+            fn test_trace_example() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                assert_eq!(m.trace(), 5);
+            }
+
+            #[test]
+            fn test_trace_mixed() {
+                let m = Matrix::from([[8, -7], [4, 2]]);
+                assert_eq!(m.trace(), 10);
+            }
+
+            #[test]
+            fn test_trace_3x3_identity() {
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+                assert_eq!(m.trace(), 3);
+            }
+        }
     }
 
     mod transpose_tests {
@@ -1120,6 +1323,42 @@ mod tests {
             let m_tt = m.transpose().transpose();
             assert_eq!(m_tt.data, m.data);
         }
+
+        mod evaluation_transpose_tests {
+            use super::*;
+
+            #[test]
+            fn test_transpose_2x2_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.transpose().data, m.data);
+            }
+
+            #[test]
+            fn test_transpose_2x2_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.transpose().data, m.data);
+            }
+
+            #[test]
+            fn test_transpose_2x2() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                let expected = Matrix::from([[1, 3], [2, 4]]);
+                assert_eq!(m.transpose().data, expected.data);
+            }
+
+            #[test]
+            fn test_transpose_3x3_identity() {
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+                assert_eq!(m.transpose().data, m.data);
+            }
+
+            #[test]
+            fn test_transpose_2x3() {
+                let m = Matrix::from([[1, 2], [3, 4], [5, 6]]);
+                let expected = Matrix::from([[1, 3, 5], [2, 4, 6]]);
+                assert_eq!(m.transpose().data, expected.data);
+            }
+        }
     }
 
     mod row_echelon_tests {
@@ -1149,10 +1388,10 @@ mod tests {
 
             // Should reduce to identity matrix
             let result_data = rref.data;
-            assert!((result_data[0][0] - 1.0).abs() < 1e-6);
-            assert!((result_data[0][1] - 0.0).abs() < 1e-6);
-            assert!((result_data[1][0] - 0.0).abs() < 1e-6);
-            assert!((result_data[1][1] - 1.0).abs() < 1e-6);
+            assert_eq!(result_data[0][0], 1.0);
+            assert_eq!(result_data[0][1], 0.0);
+            assert_eq!(result_data[1][0], 0.0);
+            assert_eq!(result_data[1][1], 1.0);
         }
 
         #[test]
@@ -1165,10 +1404,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // With our strict tolerance (1e-10), this small difference should be detected
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-10); // First row normalized
-            assert!((rref.data[0][1] - 1.0).abs() < 1e-10); // Should be 1, not 0
-            assert!(rref.data[1][0].abs() < 1e-10); // Should be eliminated
-            assert!(Into::<f32>::into(rref.data[1][1]) - 1e-8 < 1e-10); // Should have the small difference
+            assert_eq!(rref.data[0][0], 1.0); // First row normalized
+            assert_eq!(rref.data[0][1], 1.0); // Should be 1, not 0
+            assert_eq!(rref.data[1][0], 0.0); // Should be eliminated
+            assert!(rref.data[1][1] - 1e-8 < 1e-10); // Should have the small difference
         }
 
         #[test]
@@ -1181,10 +1420,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // First row should be [1, 1], second row should be zeroed
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);
-            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);
-            assert!(rref.data[1][0].abs() < 1e-10);
-            assert!(rref.data[1][1].abs() < 1e-10);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 1.0);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
         }
 
         #[test]
@@ -1197,10 +1436,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // Should treat rows as dependent since difference is below tolerance
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-10);
-            assert!((rref.data[0][1] - 1.0).abs() < 1e-10);
-            assert!(rref.data[1][0].abs() < 1e-10);
-            assert!(rref.data[1][1].abs() < 1e-10);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 1.0);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
         }
 
         #[test]
@@ -1213,25 +1452,25 @@ mod tests {
             let rref = m.row_echelon();
 
             // Check first row - [1.0, 0.625, 0.0, 0.0, -12.1666667]
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-6);
-            assert!((rref.data[0][1] - 0.625).abs() < 1e-6);
-            assert!((rref.data[0][2] - 0.0).abs() < 1e-6);
-            assert!((rref.data[0][3] - 0.0).abs() < 1e-6);
-            assert!((rref.data[0][4] - (-12.1666667)).abs() < 1e-6);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 0.625);
+            assert_eq!(rref.data[0][2], 0.0);
+            assert_eq!(rref.data[0][3], 0.0);
+            assert!((rref.data[0][4] - (-12.1666667)).to_f32().abs() < 1e-6);
 
             // Check second row - [0.0, 0.0, 1.0, 0.0, -3.6666667]
-            assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][2] - 1.0).abs() < 1e-6);
-            assert!((rref.data[1][3] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][4] - (-3.6666667)).abs() < 1e-6);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
+            assert_eq!(rref.data[1][2], 1.0);
+            assert_eq!(rref.data[1][3], 0.0);
+            assert_eq!(rref.data[1][4], -3.6666667);
 
             // Check third row - [0.0, 0.0, 0.0, 1.0, 29.5]
-            assert!((rref.data[2][0] - 0.0).abs() < 1e-6);
-            assert!((rref.data[2][1] - 0.0).abs() < 1e-6);
-            assert!((rref.data[2][2] - 0.0).abs() < 1e-6);
-            assert!((rref.data[2][3] - 1.0).abs() < 1e-6);
-            assert!((rref.data[2][4] - 29.5).abs() < 1e-6);
+            assert_eq!(rref.data[2][0], 0.0);
+            assert_eq!(rref.data[2][1], 0.0);
+            assert_eq!(rref.data[2][2], 0.0);
+            assert_eq!(rref.data[2][3], 1.0);
+            assert_eq!(rref.data[2][4], 29.5);
         }
 
         #[test]
@@ -1258,10 +1497,49 @@ mod tests {
             let rref = m.row_echelon();
 
             // Second row should reduce to zero
-            assert!((rref.data[0][0] - 1.0).abs() < 1e-6);
-            assert!((rref.data[0][1] - 2.0).abs() < 1e-6);
-            assert!((rref.data[1][0] - 0.0).abs() < 1e-6);
-            assert!((rref.data[1][1] - 0.0).abs() < 1e-6);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 2.0);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
+        }
+
+        mod evaluation_row_echelon_tests {
+            use super::*;
+
+            #[test]
+            fn test_row_echelon_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_row_echelon_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_row_echelon_example() {
+                let m = Matrix::from([[4., 2.], [2., 1.]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1., 0.5], vec![0., 0.]]);
+            }
+
+            #[test]
+            fn test_row_echelon_invertible() {
+                let m = Matrix::from([[-7, 2], [4, 8]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_row_echelon_dependent() {
+                let m = Matrix::from([[1, 2], [4, 8]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1, 2], vec![0, 0]]);
+            }
         }
     }
     mod determinant_tests {
@@ -1343,6 +1621,58 @@ mod tests {
             ]);
             m.determinant();
         }
+
+        mod evaluation_determinant_tests {
+            use super::*;
+
+            #[test]
+            fn test_det_2x2_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.determinant(), 0);
+            }
+
+            #[test]
+            fn test_det_2x2_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.determinant(), 1);
+            }
+
+            #[test]
+            fn test_det_2x2_scale() {
+                let m = Matrix::from([[2, 0], [0, 2]]);
+                assert_eq!(m.determinant(), 4);
+            }
+
+            #[test]
+            fn test_det_2x2_singular() {
+                let m = Matrix::from([[1, 1], [1, 1]]);
+                assert_eq!(m.determinant(), 0);
+            }
+
+            #[test]
+            fn test_det_2x2_negative() {
+                let m = Matrix::from([[0, 1], [1, 0]]);
+                assert_eq!(m.determinant(), -1);
+            }
+
+            #[test]
+            fn test_det_2x2_example() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                assert_eq!(m.determinant(), -2);
+            }
+
+            #[test]
+            fn test_det_2x2_mixed() {
+                let m = Matrix::from([[-7, 5], [4, 6]]);
+                assert_eq!(m.determinant(), -62);
+            }
+
+            #[test]
+            fn test_det_3x3_identity() {
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+                assert_eq!(m.determinant(), 1);
+            }
+        }
     }
 
     mod inverse_tests {
@@ -1364,7 +1694,8 @@ mod tests {
             for i in 0..2 {
                 for j in 0..2 {
                     assert!(
-                        (inv.data[i][j] - expected.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs()
+                            < Matrix::<f32>::TOLERANCE
                     );
                 }
             }
@@ -1393,9 +1724,89 @@ mod tests {
             for i in 0..2 {
                 for j in 0..2 {
                     assert!(
-                        (prod.data[i][j] - identity.data[i][j]).abs() < Matrix::<f32>::TOLERANCE
+                        (prod.data[i][j] - identity.data[i][j]).to_f32().abs()
+                            < Matrix::<f32>::TOLERANCE
                     );
                 }
+            }
+        }
+
+        #[test]
+        fn test_inverse_from_subject() {
+            let u = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
+            let inv = u.inverse().unwrap();
+            let expected = Matrix::from([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
+            assert_eq!(inv.data, expected.data);
+
+            let u = Matrix::from([[2., 0., 0.], [0., 2., 0.], [0., 0., 2.]]);
+            let inv = u.inverse().unwrap();
+            let expected = Matrix::from([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]]);
+            assert_eq!(inv.data, expected.data);
+
+            let u = Matrix::from([[8., 5., -2.], [4., 7., 20.], [7., 6., 1.]]);
+            let inv = u.inverse().unwrap();
+            let expected = Matrix::from([
+                [0.649425287, 0.097701149, -0.655172414],
+                [-0.781609195, -0.126436782, 0.965517241],
+                [0.143678161, 0.074712644, -0.206896552],
+            ]);
+            for i in 0..3 {
+                for j in 0..3 {
+                    assert!(
+                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs()
+                            < Matrix::<f32>::TOLERANCE
+                    );
+                }
+            }
+        }
+
+        mod evaluation_inverse_tests {
+            use super::*;
+
+            #[test]
+            fn test_inverse_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                let inv = m.inverse().unwrap();
+                assert_eq!(inv.data, m.data);
+            }
+
+            #[test]
+            fn test_inverse_scale() {
+                let m = Matrix::from([[2.0, 0.0], [0.0, 2.0]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[0.5, 0.0], [0.0, 0.5]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_twice() {
+                let m = Matrix::from([[0.5, 0.0], [0.0, 0.5]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[2.0, 0.0], [0.0, 2.0]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_negative() {
+                let m = Matrix::from([[0, 1], [1, 0]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[0, 1], [1, 0]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_example() {
+                let m = Matrix::from([[1., 2.], [3., 4.]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[-2., 1.], [1.5, -0.5]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_3x3_identity() {
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+                let inv = m.inverse().unwrap();
+                assert_eq!(inv.data, m.data);
             }
         }
     }
@@ -1434,6 +1845,58 @@ mod tests {
                 [21.0, 18.0, 7.0],
             ]);
             assert_eq!(m.rank(), 3);
+        }
+
+        mod evaluation_rank_tests {
+            use super::*;
+
+            #[test]
+            fn test_rank_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.rank(), 0);
+            }
+
+            #[test]
+            fn test_rank_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_scale() {
+                let m = Matrix::from([[2, 0], [0, 2]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_singular() {
+                let m = Matrix::from([[1, 1], [1, 1]]);
+                assert_eq!(m.rank(), 1);
+            }
+
+            #[test]
+            fn test_rank_negative() {
+                let m = Matrix::from([[0, 1], [1, 0]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_example() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_mixed() {
+                let m = Matrix::from([[-7, 5], [4, 6]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_3x3_identity() {
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+                assert_eq!(m.rank(), 3);
+            }
         }
     }
 }

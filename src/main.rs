@@ -794,7 +794,6 @@ fn exercise_15() {
     println!("z1 + z2 = {}", z1 + z2);
     println!("z1 * z2 = {}", z1 * z2);
     println!("|z1| = {}", z1.modulus());
-    println!("arg(z1) = {}", z1.arg());
 
     // Complex Vector Operations
     println!("\nComplex Vector Operations:");
@@ -905,8 +904,8 @@ fn main() {
             exercise_14();
             exercise_15();
         }
-        Some(arg) => {
-            println!("Unknown exercise: {}", arg);
+        Some(input) => {
+            println!("Unknown exercise: {}", input);
             print_usage();
         }
     }

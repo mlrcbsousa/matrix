@@ -39,7 +39,7 @@ where
 {
     let mut a = u.clone();
     let mut b = v.clone();
-    a *= 1.0 - t;
+    b -= u;
     b *= t;
     a += b;
     a
@@ -86,6 +86,15 @@ mod tests {
     }
 
     #[test]
+    fn test_lerp_vector_f32() {
+        let v1: Vector<f32> = Vector::new(vec![1.0, 2.0, 3.0]);
+        let v2: Vector<f32> = Vector::new(vec![3.0, 5.0, 6.0]);
+        let t = 0.2;
+        let result = lerp(v1, v2, t);
+        assert_eq!(result.data, vec![1.4, 2.6, 3.6]);
+    }
+
+    #[test]
     fn test_lerp_matrix() {
         let m1 = create_test_matrix_1();
         let m2 = create_test_matrix_2();
@@ -107,6 +116,26 @@ mod tests {
         let m2 = create_test_matrix_2();
         let result = lerp(m1, m2, 1.0);
         assert_eq!(result.data, vec![vec![20.0, 10.0], vec![30.0, 40.0]]);
+    }
+
+    mod evaluation_lerp_tests {
+        use super::*;
+
+        #[test]
+        fn test_lerp_floats() {
+            assert_eq!(lerp(0., 1., 0.), 0.);
+            assert_eq!(lerp(0., 1., 1.), 1.);
+            assert_eq!(lerp(0., 42., 0.5), 21.);
+            assert_eq!(lerp(-42., 42., 0.5), 0.);
+        }
+
+        #[test]
+        fn test_lerp_vectors() {
+            let v1 = Vector::from([-42., 42.]);
+            let v2 = Vector::from([42., -42.]);
+            let result = lerp(v1, v2, 0.5);
+            assert_eq!(result.data, vec![0.0, 0.0]);
+        }
     }
 
     // Helper functions to create test data

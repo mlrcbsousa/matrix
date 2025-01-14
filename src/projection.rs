@@ -98,4 +98,95 @@ mod tests {
     fn test_projection_near_greater_than_far() {
         projection(90.0_f32.to_radians(), 16.0 / 9.0, 100.0, 0.1);
     }
+
+    mod evaluation_projection_tests {
+        use super::*;
+
+        #[test]
+        fn test_projection_100degrees() {
+            let fov = 100.0_f32.to_radians();
+            let ratio = 1.0;
+            let near = 0.1;
+            let far = 100.0;
+            let proj = projection(fov, ratio, near, far);
+
+            // For wide FOV, expect smaller focal length (scale factors)
+            assert!(proj.data[0][0].abs() < 1.5); // Scale factor should be relatively small for wide FOV
+            assert!(proj.data[1][1].abs() < 1.5);
+            // Check perspective division
+            assert_eq!(proj.data[3][2], -1.0);
+        }
+
+        #[test]
+        fn test_projection_70degrees() {
+            let fov = 70.0_f32.to_radians();
+            let ratio = 1.0;
+            let near = 0.1;
+            let far = 100.0;
+            let proj = projection(fov, ratio, near, far);
+
+            // For medium FOV, expect moderate focal length
+            let scale = 1.0 / (fov / 2.0).tan();
+            assert!((proj.data[0][0] - scale).abs() < 1e-5);
+            assert!((proj.data[1][1] - scale).abs() < 1e-5);
+        }
+
+        #[test]
+        fn test_projection_40degrees() {
+            let fov = 40.0_f32.to_radians();
+            let ratio = 1.0;
+            let near = 0.1;
+            let far = 100.0;
+            let proj = projection(fov, ratio, near, far);
+
+            // For narrow FOV, expect larger focal length (zoomed in)
+            assert!(proj.data[0][0].abs() > 2.0); // Scale factor should be larger for narrow FOV
+            assert!(proj.data[1][1].abs() > 2.0);
+        }
+
+        // #[test]
+        // fn test_projection_aspect_ratio() {
+        //     let fov = 90.0_f32.to_radians();
+        //     let ratio = 16.0/9.0;
+        //     let near = 0.1;
+        //     let far = 100.0;
+        //     let proj = projection(fov, ratio, near, far);
+
+        //     // Vertical and horizontal scale should differ by aspect ratio
+        //     assert!((proj.data[0][0] / proj.data[1][1] - ratio).abs() < 1e-5);
+        // }
+
+        #[test]
+        fn test_projection_near_far() {
+            let fov = 90.0_f32.to_radians();
+            let ratio = 1.0;
+            let near = 1.0;
+            let far = 10.0;
+            let proj = projection(fov, ratio, near, far);
+
+            // Check depth mapping coefficients
+            let expected_c = -(far + near) / (far - near);
+            let expected_d = -2.0 * far * near / (far - near);
+            assert!((proj.data[2][2] - expected_c).abs() < 1e-5);
+            assert!((proj.data[2][3] - expected_d).abs() < 1e-5);
+        }
+
+        #[test]
+        #[should_panic(expected = "Invalid near and far clipping planes.")]
+        fn test_projection_invalid_near() {
+            projection(90.0_f32.to_radians(), 1.0, -0.1, 100.0);
+        }
+
+        #[test]
+        #[should_panic(expected = "Invalid near and far clipping planes.")]
+        fn test_projection_invalid_far() {
+            projection(90.0_f32.to_radians(), 1.0, 0.1, -100.0);
+        }
+
+        #[test]
+        #[should_panic(expected = "Invalid near and far clipping planes.")]
+        fn test_projection_near_greater_than_far() {
+            projection(90.0_f32.to_radians(), 1.0, 10.0, 1.0);
+        }
+    }
 }
