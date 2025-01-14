@@ -1250,10 +1250,10 @@ mod tests {
 
             // Should reduce to identity matrix
             let result_data = rref.data;
-            assert!((result_data[0][0] - 1.0).to_f32().abs() < 1e-6);
-            assert!((result_data[0][1] - 0.0).to_f32().abs() < 1e-6);
-            assert!((result_data[1][0] - 0.0).to_f32().abs() < 1e-6);
-            assert!((result_data[1][1] - 1.0).to_f32().abs() < 1e-6);
+            assert_eq!(result_data[0][0], 1.0);
+            assert_eq!(result_data[0][1], 0.0);
+            assert_eq!(result_data[1][0], 0.0);
+            assert_eq!(result_data[1][1], 1.0);
         }
 
         #[test]
@@ -1266,9 +1266,9 @@ mod tests {
             let rref = m.row_echelon();
 
             // With our strict tolerance (1e-10), this small difference should be detected
-            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10); // First row normalized
-            assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10); // Should be 1, not 0
-            assert!(rref.data[1][0].to_f32().abs() < 1e-10); // Should be eliminated
+            assert_eq!(rref.data[0][0], 1.0); // First row normalized
+            assert_eq!(rref.data[0][1], 1.0); // Should be 1, not 0
+            assert_eq!(rref.data[1][0], 0.0); // Should be eliminated
             assert!(rref.data[1][1] - 1e-8 < 1e-10); // Should have the small difference
         }
 
@@ -1282,10 +1282,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // First row should be [1, 1], second row should be zeroed
-            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10);
-            assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10);
-            assert!(rref.data[1][0].to_f32().abs() < 1e-10);
-            assert!(rref.data[1][1].to_f32().abs() < 1e-10);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 1.0);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
         }
 
         #[test]
@@ -1298,10 +1298,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // Should treat rows as dependent since difference is below tolerance
-            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-10);
-            assert!((rref.data[0][1] - 1.0).to_f32().abs() < 1e-10);
-            assert!(rref.data[1][0].to_f32().abs() < 1e-10);
-            assert!(rref.data[1][1].to_f32().abs() < 1e-10);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 1.0);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
         }
 
         #[test]
@@ -1314,25 +1314,25 @@ mod tests {
             let rref = m.row_echelon();
 
             // Check first row - [1.0, 0.625, 0.0, 0.0, -12.1666667]
-            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[0][1] - 0.625).to_f32().abs() < 1e-6);
-            assert!((rref.data[0][2] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[0][3] - 0.0).to_f32().abs() < 1e-6);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 0.625);
+            assert_eq!(rref.data[0][2], 0.0);
+            assert_eq!(rref.data[0][3], 0.0);
             assert!((rref.data[0][4] - (-12.1666667)).to_f32().abs() < 1e-6);
 
             // Check second row - [0.0, 0.0, 1.0, 0.0, -3.6666667]
-            assert!((rref.data[1][0] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[1][1] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[1][2] - 1.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[1][3] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[1][4] - (-3.6666667)).to_f32().abs() < 1e-6);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
+            assert_eq!(rref.data[1][2], 1.0);
+            assert_eq!(rref.data[1][3], 0.0);
+            assert_eq!(rref.data[1][4], -3.6666667);
 
             // Check third row - [0.0, 0.0, 0.0, 1.0, 29.5]
-            assert!((rref.data[2][0] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[2][1] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[2][2] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[2][3] - 1.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[2][4] - 29.5).to_f32().abs() < 1e-6);
+            assert_eq!(rref.data[2][0], 0.0);
+            assert_eq!(rref.data[2][1], 0.0);
+            assert_eq!(rref.data[2][2], 0.0);
+            assert_eq!(rref.data[2][3], 1.0);
+            assert_eq!(rref.data[2][4], 29.5);
         }
 
         #[test]
@@ -1359,10 +1359,10 @@ mod tests {
             let rref = m.row_echelon();
 
             // Second row should reduce to zero
-            assert!((rref.data[0][0] - 1.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[0][1] - 2.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[1][0] - 0.0).to_f32().abs() < 1e-6);
-            assert!((rref.data[1][1] - 0.0).to_f32().abs() < 1e-6);
+            assert_eq!(rref.data[0][0], 1.0);
+            assert_eq!(rref.data[0][1], 2.0);
+            assert_eq!(rref.data[1][0], 0.0);
+            assert_eq!(rref.data[1][1], 0.0);
         }
     }
     mod determinant_tests {

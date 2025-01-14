@@ -212,10 +212,12 @@ impl<K: Scalar> Vector<K> {
     /// let norm = v.norm_1(); // Returns 7.0 (|3| + |-4|)
     /// ```
     pub fn norm_1(&self) -> f32 {
-        let mut sum: f32 = 0.0;
+        let mut sum: f32 = f32::zero();
+
         for val in &self.data {
             sum += (*val).to_f32().abs();
         }
+
         sum
     }
 
@@ -238,12 +240,14 @@ impl<K: Scalar> Vector<K> {
     /// let norm = v.norm(); // Returns 5.0 (√(3² + 4²))
     /// ```
     pub fn norm(&self) -> f32 {
-        let mut sum_sq: f32 = 0.0;
+        let mut sum_sq = f32::zero();
+
         for val in &self.data {
             let val_f32: f32 = (*val).to_f32();
             // Use FMA for sum of squares: val² + previous_sum
             sum_sq = f32::fma(val_f32, val_f32, sum_sq);
         }
+
         sum_sq.sqrt()
     }
 
@@ -946,6 +950,61 @@ mod tests {
             assert!(norm_inf <= norm_2);
             assert!(norm_2 <= norm_1);
         }
+
+        mod evaluation_norm_tests {
+            use super::*;
+
+            #[test]
+            fn test_euclidean_norm() {
+                let test_cases = vec![
+                    (Vector::from([0]), 0.),
+                    (Vector::from([1]), 1.),
+                    (Vector::from([0, 0]), 0.),
+                    (Vector::from([1, 0]), 1.),
+                    (Vector::from([2, 1]), 2.236067977),
+                    (Vector::from([4, 2]), 4.472135955),
+                    (Vector::from([-4, -2]), 4.472135955),
+                ];
+
+                for (v, expected) in test_cases {
+                    assert_eq!(v.norm(), expected);
+                }
+            }
+
+            #[test]
+            fn test_manhattan_norm() {
+                let test_cases = vec![
+                    (Vector::from([0]), 0.),
+                    (Vector::from([1]), 1.),
+                    (Vector::from([0, 0]), 0.),
+                    (Vector::from([1, 0]), 1.),
+                    (Vector::from([2, 1]), 3.),
+                    (Vector::from([4, 2]), 6.),
+                    (Vector::from([-4, -2]), 6.),
+                ];
+
+                for (v, expected) in test_cases {
+                    assert_eq!(v.norm_1(), expected);
+                }
+            }
+
+            #[test]
+            fn test_supremum_norm() {
+                let test_cases = vec![
+                    (Vector::from([0]), 0.),
+                    (Vector::from([1]), 1.),
+                    (Vector::from([0, 0]), 0.),
+                    (Vector::from([1, 0]), 1.),
+                    (Vector::from([2, 1]), 2.),
+                    (Vector::from([4, 2]), 4.),
+                    (Vector::from([-4, -2]), 4.),
+                ];
+
+                for (v, expected) in test_cases {
+                    assert_eq!(v.norm_inf(), expected);
+                }
+            }
+        }
     }
 
     mod cosine_tests {
@@ -993,6 +1052,45 @@ mod tests {
             let v1 = Vector::from([1.0, 0.0]);
             let v2 = Vector::from([1.0]);
             angle_cos(&v1, &v2);
+        }
+
+        mod evaluation_cosine_tests {
+            use super::*;
+
+            #[test]
+            fn test_cosine_zero() {
+                let v1 = Vector::from([1, 0]);
+                let v2 = Vector::from([0, 1]);
+                assert_eq!(angle_cos(&v1, &v2), 0.0);
+            }
+
+            #[test]
+            fn test_cosine_45_degrees() {
+                let v1 = Vector::from([8, 7]);
+                let v2 = Vector::from([3, 2]);
+                assert!((angle_cos(&v1, &v2) - 0.9914542955425437).abs() < 1e-6);
+            }
+
+            #[test]
+            fn test_cosine_same() {
+                let v1 = Vector::from([1, 1]);
+                let v2 = Vector::from([1, 1]);
+                assert!(angle_cos(&v1, &v2) - 1.0 < 1e-6);
+            }
+
+            #[test]
+            fn test_cosine_30_degrees() {
+                let v1 = Vector::from([4, 2]);
+                let v2 = Vector::from([1, 1]);
+                assert!((angle_cos(&v1, &v2) - 0.9486832980505138).abs() < 1e-6);
+            }
+
+            #[test]
+            fn test_cosine_150_degrees() {
+                let v1 = Vector::from([-7, 3]);
+                let v2 = Vector::from([6, 4]);
+                assert!((angle_cos(&v1, &v2) + 0.5462677805469223).abs() < 1e-6);
+            }
         }
     }
 
@@ -1052,6 +1150,58 @@ mod tests {
             let u = Vector::from([1.0, 0.0]);
             let v = Vector::from([0.0, 1.0]);
             cross_product(&u, &v);
+        }
+
+        mod evaluation_cross_product_tests {
+            use super::*;
+
+            #[test]
+            fn test_cross_zero() {
+                let v1 = Vector::from([0, 0, 0]);
+                let v2 = Vector::from([0, 0, 0]);
+                let result = cross_product(&v1, &v2);
+                assert_eq!(result.data, vec![0, 0, 0]);
+            }
+
+            #[test]
+            fn test_cross_zero_unit() {
+                let v1 = Vector::from([1, 0, 0]);
+                let v2 = Vector::from([0, 0, 0]);
+                let result = cross_product(&v1, &v2);
+                assert_eq!(result.data, vec![0, 0, 0]);
+            }
+
+            #[test]
+            fn test_cross_basis() {
+                let v1 = Vector::from([1, 0, 0]);
+                let v2 = Vector::from([0, 1, 0]);
+                let result = cross_product(&v1, &v2);
+                assert_eq!(result.data, vec![0, 0, 1]);
+            }
+
+            #[test]
+            fn test_cross_example() {
+                let v1 = Vector::from([8, 7, -4]);
+                let v2 = Vector::from([3, 2, 1]);
+                let result = cross_product(&v1, &v2);
+                assert_eq!(result.data, vec![15, -20, -5]);
+            }
+
+            #[test]
+            fn test_cross_same() {
+                let v1 = Vector::from([1, 1, 1]);
+                let v2 = Vector::from([0, 0, 0]);
+                let result = cross_product(&v1, &v2);
+                assert_eq!(result.data, vec![0, 0, 0]);
+            }
+
+            #[test]
+            fn test_cross_same_direction() {
+                let v1 = Vector::from([1, 1, 1]);
+                let v2 = Vector::from([1, 1, 1]);
+                let result = cross_product(&v1, &v2);
+                assert_eq!(result.data, vec![0, 0, 0]);
+            }
         }
     }
 }

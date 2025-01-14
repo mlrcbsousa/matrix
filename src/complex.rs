@@ -226,13 +226,13 @@ mod tests {
         let v = Vector::new(vec![Complex::new(1.0, 1.0), Complex::new(2.0, 2.0)]);
 
         // 1-norm: |1 + i| + |2 + 2i| = √2 + 2√2
-        assert!((v.norm_1() - (2.0f32.sqrt() * 3.0)).abs() < 1e-6);
+        assert_eq!(v.norm_1(), (2.0f32.sqrt() * 3.0));
 
         // 2-norm: √(|1 + i|² + |2 + 2i|²) = √(2 + 8) = √10
-        assert!((v.norm() - 10.0f32.sqrt()).abs() < 1e-6);
+        assert_eq!(v.norm(), 10.0f32.sqrt());
 
         // inf-norm: max(|1 + i|, |2 + 2i|) = 2√2
-        assert!((v.norm_inf() - (2.0f32.sqrt() * 2.0)).abs() < 1e-6);
+        assert_eq!(v.norm_inf(), (2.0f32.sqrt() * 2.0));
     }
 
     #[test]
