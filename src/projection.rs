@@ -126,7 +126,7 @@ mod tests {
             let proj = projection(fov, ratio, near, far);
 
             // For medium FOV, expect moderate focal length
-            let scale = 1.0 / (fov/2.0).tan();
+            let scale = 1.0 / (fov / 2.0).tan();
             assert!((proj.data[0][0] - scale).abs() < 1e-5);
             assert!((proj.data[1][1] - scale).abs() < 1e-5);
         }
