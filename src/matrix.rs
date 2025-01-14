@@ -1126,6 +1126,74 @@ mod tests {
             m.mul_vec(&v);
         }
 
+        mod evaluation_linear_transform_tests {
+            use super::*;
+
+            #[test]
+            fn test_matrix_vector_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                let v = Vector::from([4, 2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([0, 0]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([-4, -2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([10, 30]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+            }
+
+            #[test]
+            fn test_matrix_vector_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                let v = Vector::from([4, 2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, v.data);
+
+                let v = Vector::from([0, 0]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![0, 0]);
+
+                let v = Vector::from([-4, -2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![-4, -2]);
+
+                let v = Vector::from([10, 30]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![10, 30]);
+            }
+
+            #[test]
+            fn test_matrix_vector_units() {
+                let m = Matrix::from([[1, 1], [1, 1]]);
+                let v = Vector::from([4, 2]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![6, 6]);
+            }
+
+            #[test]
+            fn test_matrix_vector_scale() {
+                let m = Matrix::from([[2, 0], [0, 2]]);
+                let v = Vector::from([2, 1]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![4, 2]);
+            }
+
+            #[test]
+            fn test_matrix_vector_halve() {
+                let m = Matrix::from([[0.5, 0.0], [0.0, 0.5]]);
+                let v = Vector::from([4.0, 2.0]);
+                let result = m.mul_vec(&v);
+                assert_eq!(result.data, vec![2.0, 1.0]);
+            }
+        }
+
         #[test]
         fn test_matrix_matrix_multiplication() {
             let m1 = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
@@ -1186,6 +1254,41 @@ mod tests {
             let m = Matrix::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             m.trace();
         }
+
+        mod evaluation_trace_tests {
+            use super::*;
+
+            #[test]
+            fn test_trace_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.trace(), 0);
+            }
+
+            #[test]
+            fn test_trace_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.trace(), 2);
+            }
+
+            #[test]
+            fn test_trace_example() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                assert_eq!(m.trace(), 5);
+            }
+
+            #[test]
+            fn test_trace_mixed() {
+                let m = Matrix::from([[8, -7], [4, 2]]);
+                assert_eq!(m.trace(), 10);
+            }
+
+            #[test]
+            fn test_trace_3x3_identity() {
+                let m = Matrix::from([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+                assert_eq!(m.trace(), 3);
+            }
+        }
+
     }
 
     mod transpose_tests {
@@ -1220,6 +1323,46 @@ mod tests {
             let m = Matrix::from([[1.0, 2.0], [3.0, 4.0]]);
             let m_tt = m.transpose().transpose();
             assert_eq!(m_tt.data, m.data);
+        }
+
+        mod evaluation_transpose_tests {
+            use super::*;
+
+            #[test]
+            fn test_transpose_2x2_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.transpose().data, m.data);
+            }
+
+            #[test]
+            fn test_transpose_2x2_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.transpose().data, m.data);
+            }
+
+            #[test]
+            fn test_transpose_2x2() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                let expected = Matrix::from([[1, 3], [2, 4]]);
+                assert_eq!(m.transpose().data, expected.data);
+            }
+
+            #[test]
+            fn test_transpose_3x3_identity() {
+                let m = Matrix::from([
+                    [1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                ]);
+                assert_eq!(m.transpose().data, m.data);
+            }
+
+            #[test]
+            fn test_transpose_2x3() {
+                let m = Matrix::from([[1, 2], [3, 4], [5, 6]]);
+                let expected = Matrix::from([[1, 3, 5], [2, 4, 6]]);
+                assert_eq!(m.transpose().data, expected.data);
+            }
         }
     }
 
@@ -1364,6 +1507,46 @@ mod tests {
             assert_eq!(rref.data[1][0], 0.0);
             assert_eq!(rref.data[1][1], 0.0);
         }
+
+        mod evaluation_row_echelon_tests {
+            use super::*;
+
+            #[test]
+            fn test_row_echelon_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![0, 0], vec![0, 0]]);
+            }
+
+            #[test]
+            fn test_row_echelon_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_row_echelon_example() {
+                let m = Matrix::from([[4., 2.], [2., 1.]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1., 0.5], vec![0., 0.]]);
+            }
+
+            #[test]
+            fn test_row_echelon_invertible() {
+                let m = Matrix::from([[-7, 2], [4, 8]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1, 0], vec![0, 1]]);
+            }
+
+            #[test]
+            fn test_row_echelon_dependent() {
+                let m = Matrix::from([[1, 2], [4, 8]]);
+                let rref = m.row_echelon();
+                assert_eq!(rref.data, vec![vec![1, 2], vec![0, 0]]);
+            }
+        }
+
     }
     mod determinant_tests {
         use super::*;
@@ -1443,6 +1626,62 @@ mod tests {
                 [0.0, 0.0, 0.0, 0.0, 1.0],
             ]);
             m.determinant();
+        }
+
+        mod evaluation_determinant_tests {
+            use super::*;
+
+            #[test]
+            fn test_det_2x2_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.determinant(), 0);
+            }
+
+            #[test]
+            fn test_det_2x2_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.determinant(), 1);
+            }
+
+            #[test]
+            fn test_det_2x2_scale() {
+                let m = Matrix::from([[2, 0], [0, 2]]);
+                assert_eq!(m.determinant(), 4);
+            }
+
+            #[test]
+            fn test_det_2x2_singular() {
+                let m = Matrix::from([[1, 1], [1, 1]]);
+                assert_eq!(m.determinant(), 0);
+            }
+
+            #[test]
+            fn test_det_2x2_negative() {
+                let m = Matrix::from([[0, 1], [1, 0]]);
+                assert_eq!(m.determinant(), -1);
+            }
+
+            #[test]
+            fn test_det_2x2_example() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                assert_eq!(m.determinant(), -2);
+            }
+
+            #[test]
+            fn test_det_2x2_mixed() {
+                let m = Matrix::from([[-7, 5], [4, 6]]);
+                assert_eq!(m.determinant(), -62);
+            }
+
+            #[test]
+            fn test_det_3x3_identity() {
+                let m = Matrix::from([
+                    [1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                ]);
+                assert_eq!(m.determinant(), 1);
+            }
         }
     }
 
@@ -1530,6 +1769,60 @@ mod tests {
                 }
             }
         }
+
+        mod evaluation_inverse_tests {
+            use super::*;
+
+            #[test]
+            fn test_inverse_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                let inv = m.inverse().unwrap();
+                assert_eq!(inv.data, m.data);
+            }
+
+            #[test]
+            fn test_inverse_scale() {
+                let m = Matrix::from([[2.0, 0.0], [0.0, 2.0]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[0.5, 0.0], [0.0, 0.5]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_twice() {
+                let m = Matrix::from([[0.5, 0.0], [0.0, 0.5]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[2.0, 0.0], [0.0, 2.0]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_negative() {
+                let m = Matrix::from([[0, 1], [1, 0]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[0, 1], [1, 0]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_example() {
+                let m = Matrix::from([[1., 2.], [3., 4.]]);
+                let inv = m.inverse().unwrap();
+                let expected = Matrix::from([[-2., 1.], [1.5, -0.5]]);
+                assert_eq!(inv.data, expected.data);
+            }
+
+            #[test]
+            fn test_inverse_3x3_identity() {
+                let m = Matrix::from([
+                    [1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                ]);
+                let inv = m.inverse().unwrap();
+                assert_eq!(inv.data, m.data);
+            }
+        }
     }
 
     mod rank_tests {
@@ -1566,6 +1859,62 @@ mod tests {
                 [21.0, 18.0, 7.0],
             ]);
             assert_eq!(m.rank(), 3);
+        }
+
+        mod evaluation_rank_tests {
+            use super::*;
+
+            #[test]
+            fn test_rank_zero() {
+                let m = Matrix::from([[0, 0], [0, 0]]);
+                assert_eq!(m.rank(), 0);
+            }
+
+            #[test]
+            fn test_rank_identity() {
+                let m = Matrix::from([[1, 0], [0, 1]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_scale() {
+                let m = Matrix::from([[2, 0], [0, 2]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_singular() {
+                let m = Matrix::from([[1, 1], [1, 1]]);
+                assert_eq!(m.rank(), 1);
+            }
+
+            #[test]
+            fn test_rank_negative() {
+                let m = Matrix::from([[0, 1], [1, 0]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_example() {
+                let m = Matrix::from([[1, 2], [3, 4]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_mixed() {
+                let m = Matrix::from([[-7, 5], [4, 6]]);
+                assert_eq!(m.rank(), 2);
+            }
+
+            #[test]
+            fn test_rank_3x3_identity() {
+                let m = Matrix::from([
+                    [1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                ]);
+                assert_eq!(m.rank(), 3);
+            }
         }
     }
 }
