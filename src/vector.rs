@@ -770,6 +770,49 @@ mod tests {
             let coefs = [1.0, 1.0];
             linear_combination(&vectors, &coefs);
         }
+
+        mod evaluation_linear_combination_tests {
+            use super::*;
+
+            #[test]
+            fn test_linear_combination_1x_2d_vector() {
+                let v = Vector::from([-42., 42.]);
+                let vectors = [v];
+                let coefs = [-1.];
+                let result = linear_combination(&vectors, &coefs);
+                assert_eq!(result.data, vec![42., -42.]);
+            }
+
+            #[test]
+            fn test_linear_combination_3x_1d_vector() {
+                let v = Vector::from([-42.]);
+                let vectors = [v.clone(), v.clone(), v.clone()];
+                let coefs = [-1., 1., 0.];
+                let result = linear_combination(&vectors, &coefs);
+                assert_eq!(result.data, vec![0.]);
+            }
+
+            #[test]
+            fn test_linear_combination_3x_2d_vector() {
+                let v1 = Vector::from([-42., 42.]);
+                let v2 = Vector::from([1., 3.]);
+                let v3 = Vector::from([10., 20.]);
+                let vectors = [v1, v2, v3];
+                let coefs = [1., -10., -1.];
+                let result = linear_combination(&vectors, &coefs);
+                assert_eq!(result.data, vec![-62., -8.]);
+            }
+
+            #[test]
+            fn test_linear_combination_2x_3d_vector() {
+                let v1 = Vector::from([-42., 100., -69.5]);
+                let v2 = Vector::from([1., 3., 5.]);
+                let vectors = [v1, v2];
+                let coefs = [1., -10.];
+                let result = linear_combination(&vectors, &coefs);
+                assert_eq!(result.data, vec![-52., 70., -119.5]);
+            }
+        }
     }
 
     mod dot_product_tests {
@@ -802,6 +845,52 @@ mod tests {
             let v1 = Vector::from([1.0, 2.0]);
             let v2 = Vector::from([1.0, 2.0, 3.0]);
             v1.dot(&v2);
+        }
+
+        mod evaluation_dot_product_tests {
+            use super::*;
+
+            #[test]
+            fn test_dot_product_zero() {
+                let v1 = Vector::from([0, 0]);
+                let v2 = Vector::from([0, 0]);
+                assert_eq!(v1.dot(&v2), 0);
+            }
+
+            #[test]
+            fn test_dot_product_unit() {
+                let v1 = Vector::from([1, 0]);
+                let v2 = Vector::from([0, 0]);
+                assert_eq!(v1.dot(&v2), 0);
+            }
+
+            #[test]
+            fn test_dot_product_same() {
+                let v1 = Vector::from([1, 0]);
+                let v2 = Vector::from([1, 0]);
+                assert_eq!(v1.dot(&v2), 1);
+            }
+
+            #[test]
+            fn test_dot_product_orthogonal() {
+                let v1 = Vector::from([1, 0]);
+                let v2 = Vector::from([0, 1]);
+                assert_eq!(v1.dot(&v2), 0);
+            }
+
+            #[test]
+            fn test_dot_product_same_2() {
+                let v1 = Vector::from([1, 1]);
+                let v2 = Vector::from([1, 1]);
+                assert_eq!(v1.dot(&v2), 2);
+            }
+
+            #[test]
+            fn test_dot_product_long() {
+                let v1 = Vector::from([4, 2]);
+                let v2 = Vector::from([2, 1]);
+                assert_eq!(v1.dot(&v2), 10);
+            }
         }
     }
 

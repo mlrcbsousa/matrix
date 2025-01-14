@@ -305,7 +305,7 @@ impl<K: Scalar> Matrix<K> {
 
         // For each row of matrix
         for i in 0..self.rows() {
-            // Compute dot product with vector
+            // Compute product with vector
             for (j, v_j) in vec.data.iter().enumerate() {
                 result[i] = K::fma(self.data[i][j], *v_j, result[i]);
             }
@@ -354,7 +354,7 @@ impl<K: Scalar> Matrix<K> {
         // For each element of result matrix
         for i in 0..n {
             for j in 0..p {
-                // Compute dot product of row i from first and col j from second
+                // Compute product of row i from first and col j from second
                 for k in 0..m {
                     result[i][j] = K::fma(self.data[i][k], other.data[k][j], result[i][j]);
                 }
@@ -941,7 +941,7 @@ mod tests {
             m1.add(&m2);
         }
 
-        mod evaluation_matrix_add_tests {
+        mod evaluation_add_tests {
             use super::*;
 
             #[test]
@@ -1001,7 +1001,7 @@ mod tests {
             m1.sub(&m2);
         }
 
-        mod evaluation_matrix_sub_tests {
+        mod evaluation_sub_tests {
             use super::*;
 
             #[test]
@@ -1058,7 +1058,7 @@ mod tests {
             assert_eq!(m.data, vec![vec![0.0, 0.0], vec![0.0, 0.0]]);
         }
 
-        mod evaluation_matrix_scl_tests {
+        mod evaluation_scl_tests {
             use super::*;
 
             #[test]

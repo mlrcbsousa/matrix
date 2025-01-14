@@ -118,6 +118,26 @@ mod tests {
         assert_eq!(result.data, vec![vec![20.0, 10.0], vec![30.0, 40.0]]);
     }
 
+    mod evaluation_lerp_tests {
+        use super::*;
+
+        #[test]
+        fn test_lerp_floats() {
+            assert_eq!(lerp(0., 1., 0.), 0.);
+            assert_eq!(lerp(0., 1., 1.), 1.);
+            assert_eq!(lerp(0., 42., 0.5), 21.);
+            assert_eq!(lerp(-42., 42., 0.5), 0.);
+        }
+
+        #[test]
+        fn test_lerp_vectors() {
+            let v1 = Vector::from([-42., 42.]);
+            let v2 = Vector::from([42., -42.]);
+            let result = lerp(v1, v2, 0.5);
+            assert_eq!(result.data, vec![0.0, 0.0]);
+        }
+    }
+
     // Helper functions to create test data
     fn create_test_vector_1() -> Vector<f32> {
         Vector::from([2.0, 1.0])
