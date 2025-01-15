@@ -188,6 +188,7 @@ impl<K: Scalar> Vector<K> {
         }
 
         let mut result = K::zero();
+
         for (x, y) in self.data.iter().zip(other.data.iter()) {
             // Use FMA: result = x * y + result
             result = K::fma(*x, *y, result);

@@ -12,8 +12,14 @@ use std::ops::{AddAssign, MulAssign, SubAssign};
 /// lerp(u, v, t)   = u + t(v - u)
 ///                 = (1 - t)u + tv
 /// ```
+///
 /// Both formulas are equivalent, but the second form has a nice geometric
 /// interpretation: weighted average of vectors.
+/// However, the first form is more numerically stable because it makes only
+/// one scalar multiplication.
+///
+/// The function works with any type that implements `Clone`, `AddAssign`, `SubAssign`, and `MulAssign<f32>`.
+/// This includes `f32`, `i32`, `Vector`, and `Matrix`.
 ///
 /// # Complexity
 /// - Time: O(n) where n is the length - single pass over elements
