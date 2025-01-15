@@ -9,6 +9,10 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 
 /// Complex number representation using real and imaginary parts.
 ///
+/// Other methods that could be implemented:
+/// - `arg`: argument (angle) in radians.
+/// - `conj`: complex conjugate (a - bi).
+///
 /// # Examples
 /// ```
 /// use matrix::Complex;
@@ -19,7 +23,7 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 /// // Calculate its modulus
 /// let m = z.modulus();
 /// ```
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Complex {
     /// Real part of the complex number
     pub r: f32,
@@ -41,25 +45,24 @@ impl Complex {
     }
 
     /// Returns the modulus (magnitude) of the complex number.
+    /// The modulus is calculated as `sqrt(r² + i²)`.
     ///
     /// # Examples
     /// ```
     /// use matrix::Complex;
     ///
     /// let z = Complex::new(3.0, 4.0);
-    /// let m = z.modulus();
+    /// let m = z.modulus(); // m = 5
     /// ```
     pub fn modulus(&self) -> f32 {
         (self.r * self.r + self.i * self.i).sqrt()
     }
-
-    // Other methods that could be implemented:
-    // - `arg`: argument (angle) in radians.
-    // - `conj`: complex conjugate (a - bi).
 }
 
-// Display implementation for pretty printing
 impl fmt::Display for Complex {
+    /// Formats the complex number as a string.
+    /// If the imaginary part is negative, it will display as `a - bi`.
+    /// Otherwise, it will display as `a + bi`.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.i >= 0.0 {
             write!(f, "{} + {}i", self.r, self.i)
@@ -78,22 +81,35 @@ impl Scalar for Complex {
         Self::new(1.0, 0.0)
     }
 
-    // Implement conversion from Complex to f32 (for norm calculations)
+    /// Implement conversion from Complex to f32 by returning the modulus.
     fn to_f32(&self) -> f32 {
         self.modulus()
     }
 }
 
-// Arithmetic operations implementations
 impl Add for Complex {
     type Output = Self;
 
+    /// Adds two complex numbers together.
+    ///
+    /// To add two complex numbers, add the real parts together and the
+    /// imaginary parts together.
+    ///
+    /// # Examples
+    /// ```
+    /// use matrix::Complex;
+    ///
+    /// let a = Complex::new(1.0, 2.0);
+    /// let b = Complex::new(3.0, 4.0);
+    /// let c = a + b; // c = 4 + 6i
+    /// ```
     fn add(self, rhs: Self) -> Self {
         Self::new(self.r + rhs.r, self.i + rhs.i)
     }
 }
 
 impl AddAssign for Complex {
+    /// Adds another complex number to this one.
     fn add_assign(&mut self, rhs: Self) {
         self.r += rhs.r;
         self.i += rhs.i;
@@ -103,12 +119,26 @@ impl AddAssign for Complex {
 impl Sub for Complex {
     type Output = Self;
 
+    /// Subtracts one complex number from another.
+    ///
+    /// To subtract one complex number from another, subtract the real parts
+    /// and the imaginary parts separately.
+    ///
+    /// # Examples
+    /// ```
+    /// use matrix::Complex;
+    ///
+    /// let a = Complex::new(3.0, 4.0);
+    /// let b = Complex::new(1.0, 2.0);
+    /// let c = a - b; // c = 2 + 2i
+    /// ```
     fn sub(self, rhs: Self) -> Self {
         Self::new(self.r - rhs.r, self.i - rhs.i)
     }
 }
 
 impl SubAssign for Complex {
+    /// Subtracts another complex number from this one.
     fn sub_assign(&mut self, rhs: Self) {
         self.r -= rhs.r;
         self.i -= rhs.i;
@@ -118,6 +148,19 @@ impl SubAssign for Complex {
 impl Mul for Complex {
     type Output = Self;
 
+    /// Multiplies two complex numbers together.
+    ///
+    /// To multiply two complex numbers, use the formula:
+    /// `(a + bi)(c + di) = (ac - bd) + (ad + bc)i`.
+    ///
+    /// # Examples
+    /// ```
+    /// use matrix::Complex;
+    ///
+    /// let a = Complex::new(1.0, 2.0);
+    /// let b = Complex::new(3.0, 4.0);
+    /// let c = a * b; // c = -5 + 10i
+    /// ```
     fn mul(self, rhs: Self) -> Self {
         Self::new(
             self.r * rhs.r - self.i * rhs.i,
@@ -127,6 +170,7 @@ impl Mul for Complex {
 }
 
 impl MulAssign for Complex {
+    /// Multiplies this complex number by another.
     fn mul_assign(&mut self, rhs: Self) {
         let r = self.r * rhs.r - self.i * rhs.i;
         let i = self.r * rhs.i + self.i * rhs.r;
@@ -136,6 +180,7 @@ impl MulAssign for Complex {
 }
 
 impl MulAssign<f32> for Complex {
+    /// Multiplies this complex number by a scalar.
     fn mul_assign(&mut self, rhs: f32) {
         self.r *= rhs;
         self.i *= rhs;
@@ -145,6 +190,19 @@ impl MulAssign<f32> for Complex {
 impl Div for Complex {
     type Output = Self;
 
+    /// Divides one complex number by another.
+    ///
+    /// To divide one complex number by another, use the formula:
+    /// `(a + bi) / (c + di) = (ac + bd) / (c² + d²) + (bc - ad)i / (c² + d²)`.
+    ///
+    /// # Examples
+    /// ```
+    /// use matrix::Complex;
+    ///
+    /// let a = Complex::new(1.0, 2.0);
+    /// let b = Complex::new(3.0, 4.0);
+    /// let c = a / b; // c = 11/25 + 2/25i
+    /// ```
     fn div(self, rhs: Self) -> Self {
         let denom = rhs.r * rhs.r + rhs.i * rhs.i;
         Self::new(
@@ -155,6 +213,7 @@ impl Div for Complex {
 }
 
 impl DivAssign for Complex {
+    /// Divides this complex number by another.
     fn div_assign(&mut self, rhs: Self) {
         let denom = rhs.r * rhs.r + rhs.i * rhs.i;
         let r = (self.r * rhs.r + self.i * rhs.i) / denom;
@@ -167,6 +226,7 @@ impl DivAssign for Complex {
 impl Neg for Complex {
     type Output = Self;
 
+    /// Negates the complex number.
     fn neg(self) -> Self {
         Self::new(-self.r, -self.i)
     }

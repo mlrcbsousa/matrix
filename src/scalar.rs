@@ -39,7 +39,9 @@ pub trait Scalar:
     DivAssign +             // a /= b
     Debug +                 // println!("{:?}", a)
     Display +               // println!("{}", a)
-    Neg<Output = Self>      // -a
+    Neg<Output = Self> +    // -a
+    PartialEq +             // a == b
+    PartialOrd              // a < b
 {
     /// Returns the additive identity (zero) for this type.
     /// This element satisfies `a + zero() = a` for all `a`.

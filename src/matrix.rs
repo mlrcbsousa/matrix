@@ -38,23 +38,6 @@ pub enum MatrixError {
 }
 
 impl<K: Scalar> Matrix<K> {
-    /// Numerical tolerance for considering values effectively zero
-    /// Used across multiple matrix operations (RREF, inverse, etc.)
-    ///
-    /// We could use f32::EPSILON (≈1.19e-7) which represents the smallest positive
-    /// number where 1.0 + x ≠ 1.0 in f32. However, for RREF we chose a smaller
-    /// tolerance (1e-10) because:
-    /// 1. In RREF, we want to be very certain a value is truly zero before treating
-    ///    it as a pivot or declaring linear dependence
-    /// 2. When solving systems of equations, false non-zeros can lead to incorrect
-    ///    rank calculations and thus wrong solutions
-    /// 3. The added precision helps distinguish nearly-dependent rows that are
-    ///    actually independent
-    ///
-    /// Note: If numerical stability becomes an issue (e.g., with very large matrices
-    /// or ill-conditioned systems), increasing this to f32::EPSILON might be appropriate
-    const TOLERANCE: f32 = 1e-10;
-
     /// Creates a `Matrix<K>` from a vector of vectors of Scalar `K` values.
     ///
     /// # Example
@@ -446,13 +429,12 @@ impl<K: Scalar> Matrix<K> {
     /// Computes the Reduced Row Echelon Form (RREF) of this matrix using Gaussian elimination.
     ///
     /// Algorithm steps:
-    /// 1. For each column (potential pivot):
-    ///    a. Find row with largest absolute value in current column (partial pivoting)
-    ///    b. If largest value < TOLERANCE, skip column (no pivot here)
-    ///    c. Swap row with current pivot row
-    ///    d. Scale pivot row to make pivot = 1
-    ///    e. Eliminate entries in pivot column in all other rows
-    /// 2. Clean up values smaller than TOLERANCE to exactly zero
+    /// For each column (potential pivot):
+    ///    1. Find row with largest absolute value in current column (partial pivoting)
+    ///    2. If largest value is zero, skip column (no pivot here)
+    ///    3. Swap row with current pivot row
+    ///    4. Scale pivot row to make pivot = 1
+    ///    5. Eliminate entries in pivot column in all other rows
     ///
     /// Uses partial pivoting and numerical tolerance for stability.
     ///
@@ -474,12 +456,12 @@ impl<K: Scalar> Matrix<K> {
     /// // [0.0, 0.0]
     /// ```
     pub fn row_echelon(&self) -> Matrix<K> {
-        let rows = self.rows();
-        let cols = self.cols();
-
         if self.is_empty() {
             panic!("Cannot compute RREF of an empty matrix.");
         }
+
+        let rows = self.rows();
+        let cols = self.cols();
 
         for row in &self.data {
             if row.len() != cols {
@@ -492,19 +474,21 @@ impl<K: Scalar> Matrix<K> {
 
         // Forward elimination to RREF
         for pivot_col in 0..cols {
-            // Find row with largest absolute value in current column (partial pivoting)
+            // Find row with largest value in current column (partial pivoting)
             let mut max_row = pivot_row;
-            let mut max_val = f32::zero();
-            for r in pivot_row..rows {
-                let val: f32 = result.data[r][pivot_col].to_f32();
-                if val.abs() > max_val {
-                    max_val = val.abs();
-                    max_row = r;
+            let mut max_val = K::zero();
+
+            for i in pivot_row..rows {
+                let val = result.data[i][pivot_col];
+
+                if val.to_f32().abs() > max_val.to_f32().abs() {
+                    max_val = val;
+                    max_row = i;
                 }
             }
 
             // Skip column if no valid pivot found
-            if max_val < Self::TOLERANCE {
+            if max_val == K::zero() {
                 continue;
             }
 
@@ -515,24 +499,16 @@ impl<K: Scalar> Matrix<K> {
 
             // Scale pivot row to get leading 1
             let pivot = result.data[pivot_row][pivot_col];
-            for c in pivot_col..cols {
-                result.data[pivot_row][c] /= pivot;
+            for j in pivot_col..cols {
+                result.data[pivot_row][j] /= pivot;
             }
 
-            // Eliminate non-zero entries in pivot column
-            for r in 0..rows {
-                if r != pivot_row {
-                    let factor = result.data[r][pivot_col];
-                    if factor.to_f32().abs() > Self::TOLERANCE {
-                        for c in pivot_col..cols {
-                            result.data[r][c] =
-                                result.data[r][c] - factor * result.data[pivot_row][c];
-
-                            // Clean up near-zero values
-                            if result.data[r][c].to_f32().abs() < Self::TOLERANCE {
-                                result.data[r][c] = K::zero();
-                            }
-                        }
+            // Eliminate entries in pivot column in all other rows
+            for i in 0..rows {
+                if i != pivot_row {
+                    let factor = result.data[i][pivot_col];
+                    for j in pivot_col..cols {
+                        result.data[i][j] = result.data[i][j] - factor * result.data[pivot_row][j];
                     }
                 }
             }
@@ -704,8 +680,7 @@ impl<K: Scalar> Matrix<K> {
         let n = self.rows();
         let det = self.determinant();
 
-        // Check if matrix is invertible using tolerance
-        if det.to_f32().abs() < Self::TOLERANCE {
+        if det == K::zero() {
             return Err(MatrixError::Singular);
         }
 
@@ -758,7 +733,7 @@ impl<K: Scalar> Matrix<K> {
         let rref = self.row_echelon();
         rref.data
             .iter()
-            .filter(|row| row.iter().any(|&val| val.to_f32().abs() > Self::TOLERANCE))
+            .filter(|row| row.iter().any(|&val| val > K::zero()))
             .count()
     }
 }
@@ -1693,10 +1668,7 @@ mod tests {
 
             for i in 0..2 {
                 for j in 0..2 {
-                    assert!(
-                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs()
-                            < Matrix::<f32>::TOLERANCE
-                    );
+                    assert_eq!(inv.data[i][j], expected.data[i][j]);
                 }
             }
         }
@@ -1723,10 +1695,7 @@ mod tests {
 
             for i in 0..2 {
                 for j in 0..2 {
-                    assert!(
-                        (prod.data[i][j] - identity.data[i][j]).to_f32().abs()
-                            < Matrix::<f32>::TOLERANCE
-                    );
+                    assert_eq!(prod.data[i][j], identity.data[i][j]);
                 }
             }
         }
@@ -1752,10 +1721,7 @@ mod tests {
             ]);
             for i in 0..3 {
                 for j in 0..3 {
-                    assert!(
-                        (inv.data[i][j] - expected.data[i][j]).to_f32().abs()
-                            < Matrix::<f32>::TOLERANCE
-                    );
+                    assert_eq!(inv.data[i][j], expected.data[i][j]);
                 }
             }
         }
