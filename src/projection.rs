@@ -160,7 +160,7 @@ mod tests {
         #[test]
         fn test_projection_aspect_ratio() {
             let fov = 90.0_f32.to_radians();
-            let ratio = 16.0/9.0;
+            let ratio = 16.0 / 9.0;
             let near = 0.1;
             let far = 100.0;
             let proj = projection(fov, ratio, near, far);
