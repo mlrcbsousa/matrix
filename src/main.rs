@@ -29,6 +29,64 @@ fn print_usage() {
     println!("If no exercise specified, runs all exercises");
 }
 
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    println!("Matrix Library Demo");
+    println!("===================");
+
+    match args.get(1).map(|s| s.as_str()) {
+        Some("types") => {
+            type_scalar();
+            type_vector();
+            type_matrix();
+        }
+        Some("ex00") => exercise_00(),
+        Some("ex01") => exercise_01(),
+        Some("ex02") => exercise_02(),
+        Some("ex03") => exercise_03(),
+        Some("ex04") => exercise_04(),
+        Some("ex05") => exercise_05(),
+        Some("ex06") => exercise_06(),
+        Some("ex07") => exercise_07(),
+        Some("ex08") => exercise_08(),
+        Some("ex09") => exercise_09(),
+        Some("ex10") => exercise_10(),
+        Some("ex11") => exercise_11(),
+        Some("ex12") => exercise_12(),
+        Some("ex13") => exercise_13(),
+        Some("ex14") => exercise_14(),
+        Some("ex15") => exercise_15(),
+        Some("--help" | "-h") => print_usage(),
+        None => {
+            // Run all exercises
+            type_scalar();
+            type_vector();
+            type_matrix();
+            exercise_00();
+            exercise_01();
+            exercise_02();
+            exercise_03();
+            exercise_04();
+            exercise_05();
+            exercise_06();
+            exercise_07();
+            exercise_08();
+            exercise_09();
+            exercise_10();
+            exercise_11();
+            exercise_12();
+            exercise_13();
+            exercise_14();
+            exercise_15();
+        }
+        Some(input) => {
+            println!("Unknown exercise: {}", input);
+            print_usage();
+        }
+    }
+}
+
 /// Demonstrates the features of the Scalar trait and its implementations
 fn type_scalar() {
     println!();
@@ -762,23 +820,30 @@ fn exercise_13() {
 
 fn exercise_14() {
     println!("\nExercise 14 - Bonus: Projection matrix");
-    println!("--------------------------------");
+    println!("--------------------------------------");
 
-    let fov = 90.0_f32.to_radians(); // Field of view in radians (~90 degrees)
-    let ratio = 16.0 / 9.0; // Aspect ratio (16:9)
-    let near = 0.1; // Near clipping plane
+    let w = 16.0; // Width of the screen
+    let h = 9.0; // Height of the screen
+
+    // Projection matrix parameters
+    let fov = 40.0_f32.to_radians(); // Feild of view
+    let ratio = w / h; // Aspect ratio
+    let near = 1.0; // Near clipping plane
     let far = 100.0; // Far clipping plane
 
-    // Compute the projection matrix
     let projection_matrix = projection(fov, ratio, near, far);
-
-    println!("Projection Matrix:");
+    println!("\nProjection Matrix 40°:");
     projection_matrix.print();
 
-    // Explanation of usage
-    println!(
-        "\nThis matrix can now be used to transform 3D points in camera space to screen space."
-    );
+    let fov = 70.0_f32.to_radians(); // Feild of view
+    let projection_matrix = projection(fov, ratio, near, far);
+    println!("\nProjection Matrix 70°:");
+    projection_matrix.print();
+
+    let fov = 100.0_f32.to_radians(); // Feild of view
+    let projection_matrix = projection(fov, ratio, near, far);
+    println!("\nProjection Matrix 100°:");
+    projection_matrix.print();
 }
 
 fn exercise_15() {
@@ -851,62 +916,4 @@ fn exercise_15() {
     ]);
     println!("Cross product:");
     cross_product(&v3d1, &v3d2).print();
-}
-
-fn main() {
-    let args: Vec<String> = env::args().collect();
-
-    println!("Matrix Library Demo");
-    println!("===================");
-
-    match args.get(1).map(|s| s.as_str()) {
-        Some("types") => {
-            type_scalar();
-            type_vector();
-            type_matrix();
-        }
-        Some("ex00") => exercise_00(),
-        Some("ex01") => exercise_01(),
-        Some("ex02") => exercise_02(),
-        Some("ex03") => exercise_03(),
-        Some("ex04") => exercise_04(),
-        Some("ex05") => exercise_05(),
-        Some("ex06") => exercise_06(),
-        Some("ex07") => exercise_07(),
-        Some("ex08") => exercise_08(),
-        Some("ex09") => exercise_09(),
-        Some("ex10") => exercise_10(),
-        Some("ex11") => exercise_11(),
-        Some("ex12") => exercise_12(),
-        Some("ex13") => exercise_13(),
-        Some("ex14") => exercise_14(),
-        Some("ex15") => exercise_15(),
-        Some("--help" | "-h") => print_usage(),
-        None => {
-            // Run all exercises
-            type_scalar();
-            type_vector();
-            type_matrix();
-            exercise_00();
-            exercise_01();
-            exercise_02();
-            exercise_03();
-            exercise_04();
-            exercise_05();
-            exercise_06();
-            exercise_07();
-            exercise_08();
-            exercise_09();
-            exercise_10();
-            exercise_11();
-            exercise_12();
-            exercise_13();
-            exercise_14();
-            exercise_15();
-        }
-        Some(input) => {
-            println!("Unknown exercise: {}", input);
-            print_usage();
-        }
-    }
 }

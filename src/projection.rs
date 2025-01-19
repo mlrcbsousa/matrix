@@ -64,27 +64,32 @@ pub fn projection(fov: f32, ratio: f32, near: f32, far: f32) -> Matrix<f32> {
     let right = top * ratio;
     let left = -right;
 
-    // Build the matrix
-    let mut data = vec![vec![0.0; 4]; 4];
-
     // Scale factors
-    data[0][0] = 2.0 * near / (right - left); // X scale
-    data[1][1] = 2.0 * near / (top - bottom); // Y scale
+    let x_scale = 2.0 * near / (right - left);
+    let y_scale = 2.0 * near / (top - bottom);
 
     // Perspective transformation
-    data[0][2] = (right + left) / (right - left); // Horizontal offset
-    data[1][2] = (top + bottom) / (top - bottom); // Vertical offset
+    let x_offset = (right + left) / (right - left);
+    let y_offset = (top + bottom) / (top - bottom);
 
     // Depth normalization
-    data[2][2] = -(far + near) / (far - near);
+    let depth_norm = -(far + near) / (far - near);
 
     // Perspective division
-    data[3][2] = -1.0;
+    let pers_div = -1.0;
 
     // Depth mapping
-    data[2][3] = -2.0 * far * near / (far - near);
+    let depth_map = -(2.0 * far * near) / (far - near);
 
-    Matrix::new(data)
+    // Build the matrix
+    Matrix {
+        data: vec![
+            vec![x_scale, 0.0, x_offset, 0.0],
+            vec![0.0, y_scale, y_offset, 0.0],
+            vec![0.0, 0.0, depth_norm, depth_map],
+            vec![0.0, 0.0, pers_div, 0.0],
+        ],
+    }
 }
 
 #[cfg(test)]
