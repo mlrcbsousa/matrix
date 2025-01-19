@@ -428,15 +428,22 @@ impl<K: Scalar> Matrix<K> {
 
     /// Computes the Reduced Row Echelon Form (RREF) of this matrix using Gaussian elimination.
     ///
+    /// The row-echelon form of a matrix is a form where:
+    ///     1. The leading entry in each row is to the right of the leading entry in the previous row
+    ///     2. Rows with all zero entries are at the bottom
+    ///     3. The leading entry in each row is 1 (this is sometimes optional)
+    ///
+    /// The RREF of a matrix is the row-echelon form where constraint 3 above is NOT optional,
+    /// and one additional constraint:
+    ///     4. Leading 1 in each row is the only non-zero entry in its column
+    ///
     /// Algorithm steps:
     /// For each column (potential pivot):
-    ///    1. Find row with largest absolute value in current column (partial pivoting)
-    ///    2. If largest value is zero, skip column (no pivot here)
-    ///    3. Swap row with current pivot row
-    ///    4. Scale pivot row to make pivot = 1
-    ///    5. Eliminate entries in pivot column in all other rows
-    ///
-    /// Uses partial pivoting and numerical tolerance for stability.
+    ///     1. Find row with largest absolute value in current column (partial pivoting)
+    ///     2. If largest value is zero, skip column (no pivot here)
+    ///     3. Swap row with current pivot row
+    ///     4. Scale pivot row to make pivot = 1
+    ///     5. Eliminate entries in pivot column in all other rows
     ///
     /// # Complexity
     /// - Time: O(n³) where n is the largest dimension
