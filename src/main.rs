@@ -822,7 +822,7 @@ fn exercise_14() {
     println!("\nExercise 14 - Bonus: Projection matrix");
     println!("--------------------------------------");
 
-    let w = 16.0; // Width of the screen
+    let w = 9.0; // Width of the screen
     let h = 9.0; // Height of the screen
 
     // Projection matrix parameters

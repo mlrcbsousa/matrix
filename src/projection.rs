@@ -22,6 +22,12 @@ use crate::Matrix;
 ///     3       [   0,          0,          -1,             0           ]
 ///         ]
 /// ```
+///
+/// Note: This implementation uses an optimized calculation for symmetric view frustums,
+/// reducing floating point operations while maintaining identical results to the standard
+/// formulation. The optimization assumes a centered view axis, which is the standard
+/// case for most 3D graphics applications.
+///
 /// ## Explanation of Matrix Elements
 /// 1. **Scaling Factors**:
 ///    - The x and y scaling terms adjust based on the field of view and aspect ratio.
@@ -58,34 +64,24 @@ pub fn projection(fov: f32, ratio: f32, near: f32, far: f32) -> Matrix<f32> {
         panic!("Invalid near and far clipping planes.");
     }
 
-    // Calculate frustum dimensions
-    let top = near * (fov / 2.0).tan();
-    let bottom = -top;
-    let right = top * ratio;
-    let left = -right;
-
     // Scale factors
-    let x_scale = 2.0 * near / (right - left);
-    let y_scale = 2.0 * near / (top - bottom);
-
-    // Perspective transformation
-    let x_offset = (right + left) / (right - left);
-    let y_offset = (top + bottom) / (top - bottom);
+    let x_scale = 1.0 / (fov / 2.0).tan();
+    let y_scale = x_scale;
 
     // Depth normalization
-    let depth_norm = -(far + near) / (far - near);
+    let depth_norm = (far + near) / (near - far);
 
     // Perspective division
     let pers_div = -1.0;
 
     // Depth mapping
-    let depth_map = -(2.0 * far * near) / (far - near);
+    let depth_map = (2.0 * far * near) / (near - far);
 
     // Build the matrix
     Matrix {
         data: vec![
-            vec![x_scale, 0.0, x_offset, 0.0],
-            vec![0.0, y_scale, y_offset, 0.0],
+            vec![x_scale / ratio, 0.0, 0.0, 0.0],
+            vec![0.0, y_scale, 0.0, 0.0],
             vec![0.0, 0.0, depth_norm, depth_map],
             vec![0.0, 0.0, pers_div, 0.0],
         ],
